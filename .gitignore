@@ -1,0 +1,5 @@
+﻿node_modules/
+android/
+*.db
+*.zip
+build_log.txt

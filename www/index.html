@@ -1,0 +1,280 @@
+﻿<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mango Energy Pro</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/mango_icon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; user-select: none; }
+  .glass { background: rgba(30, 41, 59, 0.72); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+  .mango-grad { background: linear-gradient(135deg, #ff7b00 0%, #ffae00 100%); }
+  .pulse-dot { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.25); } }
+</style>
+</head>
+<body class="pb-24">
+
+<!-- HEADER -->
+<div class="sticky top-0 z-50 glass px-4 py-3 flex items-center justify-between border-b border-slate-800">
+  <div class="flex items-center gap-3">
+    <img src="/mango_icon.png" class="w-10 h-10 rounded-xl shadow-lg">
+    <div>
+      <div class="font-bold text-lg tracking-wide flex items-center gap-2">
+        MANGO PRO <span class="text-xs px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">24 kW</span>
+      </div>
+      <div class="text-xs text-slate-400 flex items-center gap-1.5">
+        <span id="connDot" class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+        <span>24/7 Skaner aktiv • Yangilandi: <b id="lastUpd" class="text-slate-200">--:--:--</b> (1s)</span>
+      </div>
+    </div>
+  </div>
+  <button onclick="togglePower()" id="pwrBtn" class="px-4 py-2 rounded-xl font-bold text-sm shadow-lg transition-all">
+    POWER
+  </button>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="max-w-xl mx-auto p-4 space-y-4">
+
+  <!-- HARORAT VA TARGET BOSHQARUVI -->
+  <div class="glass rounded-3xl p-5 relative overflow-hidden">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <span class="text-xs uppercase tracking-wider text-slate-400">Maqsadli Harorat (Target)</span>
+        <div class="text-4xl font-extrabold text-orange-400 mt-0.5"><span id="targetTemp">45.0</span>°C</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="changeTemp(-0.5)" class="w-12 h-12 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-2xl font-bold border border-slate-700">-</button>
+        <button onclick="changeTemp(0.5)" class="w-12 h-12 rounded-2xl mango-grad text-slate-950 active:scale-95 text-2xl font-bold shadow-lg">+</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-4 gap-2 text-center pt-3 border-t border-slate-800/80">
+      <div class="bg-slate-900/60 p-2.5 rounded-2xl">
+        <div class="text-[11px] text-slate-400">Padacha</div>
+        <div class="text-lg font-bold text-red-400"><span id="outTemp">--</span>°C</div>
+      </div>
+      <div class="bg-slate-900/60 p-2.5 rounded-2xl">
+        <div class="text-[11px] text-slate-400">Obratka</div>
+        <div class="text-lg font-bold text-sky-400"><span id="inTemp">--</span>°C</div>
+      </div>
+      <div class="bg-slate-900/60 p-2.5 rounded-2xl">
+        <div class="text-[11px] text-slate-400">Bufer / GVS</div>
+        <div class="text-lg font-bold text-amber-400"><span id="dhwTemp">--</span>°C</div>
+      </div>
+      <div class="bg-slate-900/60 p-2.5 rounded-2xl">
+        <div class="text-[11px] text-slate-400">Ko'cha</div>
+        <div class="text-lg font-bold text-emerald-400"><span id="ambTemp">--</span>°C</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JONLI TELEMETRIYA (1 SEKUNDDA YANGILANADI) -->
+  <div class="grid grid-cols-3 gap-3">
+    <div class="glass p-3.5 rounded-2xl">
+      <div class="text-xs text-slate-400">Elektr Sarfi</div>
+      <div class="text-xl font-extrabold text-white mt-1"><span id="pwrKw">0.00</span> <span class="text-xs font-normal text-slate-400">kW</span></div>
+      <div class="text-[11px] text-orange-400 mt-1">Chastota: <span id="compHz">0</span> Hz</div>
+    </div>
+    <div class="glass p-3.5 rounded-2xl">
+      <div class="text-xs text-slate-400">Issiqlik Quvvati</div>
+      <div class="text-xl font-extrabold text-emerald-400 mt-1"><span id="heatKw">0.00</span> <span class="text-xs font-normal text-slate-400">kW</span></div>
+      <div class="text-[11px] text-slate-400 mt-1">Oqim: <span id="wFlow">0</span> L/m</div>
+    </div>
+    <div class="glass p-3.5 rounded-2xl">
+      <div class="text-xs text-slate-400">Samaradorlik (COP)</div>
+      <div class="text-xl font-extrabold text-sky-400 mt-1">x<span id="copVal">0.00</span></div>
+      <div class="text-[11px] text-slate-400 mt-1">Fan: <span id="fanRpm">0</span> rpm</div>
+    </div>
+  </div>
+
+  <!-- REJIMLAR VA PRESET KNOPKALARI -->
+  <div class="glass rounded-3xl p-4 space-y-3">
+    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400">Ishlash Rejimi (Mode)</div>
+    <div class="grid grid-cols-4 gap-2" id="modeBtns">
+      <button onclick="sendCmd('mode','HEATING')" data-m="HEATING" class="py-2.5 rounded-xl text-xs font-bold border border-slate-700">🔥 Isitish</button>
+      <button onclick="sendCmd('mode','COOLING')" data-m="COOLING" class="py-2.5 rounded-xl text-xs font-bold border border-slate-700">❄️ Sovutish</button>
+      <button onclick="sendCmd('mode','DHW')" data-m="DHW" class="py-2.5 rounded-xl text-xs font-bold border border-slate-700">🚿 GVS Suv</button>
+      <button onclick="sendCmd('mode','AUTO')" data-m="AUTO" class="py-2.5 rounded-xl text-xs font-bold border border-slate-700">🤖 Avto</button>
+    </div>
+
+    <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 pt-2">Quvvat Profili (Preset)</div>
+    <div class="grid grid-cols-4 gap-2" id="presetBtns">
+      <button onclick="sendCmd('preset','NORMAL')" data-p="NORMAL" class="py-2 rounded-xl text-xs font-bold border border-slate-700">⚖️ Normal</button>
+      <button onclick="sendCmd('preset','ECO')" data-p="ECO" class="py-2 rounded-xl text-xs font-bold border border-slate-700">🌿 Eco</button>
+      <button onclick="sendCmd('preset','TURBO')" data-p="TURBO" class="py-2 rounded-xl text-xs font-bold border border-slate-700">⚡ Turbo</button>
+      <button onclick="sendCmd('preset','SILENT')" data-p="SILENT" class="py-2 rounded-xl text-xs font-bold border border-slate-700">🌙 Tungi</button>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 pt-2">
+      <button onclick="toggleExtra('weather_comp')" id="btnWeather" class="py-2 px-2 rounded-xl text-[11px] font-semibold border border-slate-700">📈 Ob-havo avto</button>
+      <button onclick="toggleExtra('defrost')" id="btnDefrost" class="py-2 px-2 rounded-xl text-[11px] font-semibold border border-slate-700">🧊 Defrost</button>
+      <button onclick="toggleExtra('anti_legionella')" id="btnLegion" class="py-2 px-2 rounded-xl text-[11px] font-semibold border border-slate-700">🛡️ Dezinfeksiya</button>
+    </div>
+  </div>
+
+  <!-- STATISTIKA BO'LIMI (KUNLIK, HAFTALIK, OYLIK, OXIRGI SEANSLAR) -->
+  <div class="glass rounded-3xl p-4 space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="font-bold text-base">📊 Aniq Statistika (24/7 Baza)</div>
+      <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+        Joriy seans: <b id="curSessMin">0</b> daq (<b id="curSessKwh">0</b> kWh)
+      </span>
+    </div>
+
+    <!-- Kunlik / Haftalik / Oylik Kartochkalar -->
+    <div class="grid grid-cols-3 gap-2.5 text-center">
+      <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+        <div class="text-xs text-slate-400">KUNLIK (24s)</div>
+        <div class="text-lg font-extrabold text-orange-400 mt-1"><span id="dKwh">0</span> <span class="text-xs">kWh</span></div>
+        <div class="text-[11px] text-slate-400 mt-0.5">COP: <b id="dCop">0</b> • <span id="dHrs">0</span> soat</div>
+        <div class="text-[10px] text-emerald-400 mt-1" id="dUzs">0 so'm</div>
+      </div>
+      <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+        <div class="text-xs text-slate-400">HAFTALIK (7k)</div>
+        <div class="text-lg font-extrabold text-sky-400 mt-1"><span id="wKwh">0</span> <span class="text-xs">kWh</span></div>
+        <div class="text-[11px] text-slate-400 mt-0.5">COP: <b id="wCop">0</b> • <span id="wHrs">0</span> soat</div>
+        <div class="text-[10px] text-emerald-400 mt-1" id="wUzs">0 so'm</div>
+      </div>
+      <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+        <div class="text-xs text-slate-400">OYLIK (30k)</div>
+        <div class="text-lg font-extrabold text-purple-400 mt-1"><span id="mKwh">0</span> <span class="text-xs">kWh</span></div>
+        <div class="text-[11px] text-slate-400 mt-0.5">COP: <b id="mCop">0</b> • <span id="mHrs">0</span> soat</div>
+        <div class="text-[10px] text-emerald-400 mt-1" id="mUzs">0 so'm</div>
+      </div>
+    </div>
+
+    <!-- Oxirgi Seanslar Ro'yxati -->
+    <div>
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">⏱️ Oxirgi Ishlash Seanslari</div>
+      <div class="space-y-1.5 max-h-60 overflow-y-auto pr-1" id="sessionsList"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentState = {};
+
+async function fetchStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    currentState = d;
+    
+    document.getElementById('lastUpd').innerText = d.last_update;
+    document.getElementById('connDot').className = "w-2 h-2 rounded-full bg-emerald-400 pulse-dot";
+    
+    const pBtn = document.getElementById('pwrBtn');
+    if (d.power) {
+      pBtn.innerText = "ON • ISHLAMOQDA";
+      pBtn.className = "px-4 py-2 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25";
+    } else {
+      pBtn.innerText = "OFF • O'CHIQ";
+      pBtn.className = "px-4 py-2 rounded-xl font-bold text-xs bg-rose-600 text-white shadow-lg";
+    }
+
+    document.getElementById('targetTemp').innerText = d.target_temp.toFixed(1);
+    document.getElementById('outTemp').innerText = d.outlet_temp.toFixed(1);
+    document.getElementById('inTemp').innerText = d.inlet_temp.toFixed(1);
+    document.getElementById('dhwTemp').innerText = d.dhw_temp.toFixed(1);
+    document.getElementById('ambTemp').innerText = d.ambient_temp.toFixed(1);
+
+    document.getElementById('pwrKw').innerText = d.power_kw.toFixed(2);
+    document.getElementById('heatKw').innerText = d.heat_kw.toFixed(2);
+    document.getElementById('copVal').innerText = d.cop.toFixed(2);
+    document.getElementById('compHz').innerText = d.compressor_hz;
+    document.getElementById('wFlow').innerText = d.water_flow.toFixed(1);
+    document.getElementById('fanRpm').innerText = d.fan_rpm;
+
+    document.getElementById('curSessMin').innerText = d.current_session_min;
+    document.getElementById('curSessKwh').innerText = d.current_session_kwh.toFixed(2);
+
+    // Highlight active Mode & Preset
+    document.querySelectorAll('#modeBtns button').forEach(b => {
+      b.className = b.dataset.m === d.mode
+        ? "py-2.5 rounded-xl text-xs font-bold mango-grad text-slate-950 shadow-md"
+        : "py-2.5 rounded-xl text-xs font-bold bg-slate-900/70 text-slate-300 border border-slate-800";
+    });
+    document.querySelectorAll('#presetBtns button').forEach(b => {
+      b.className = b.dataset.p === d.preset
+        ? "py-2 rounded-xl text-xs font-bold bg-sky-500 text-slate-950 shadow-md"
+        : "py-2 rounded-xl text-xs font-bold bg-slate-900/70 text-slate-300 border border-slate-800";
+    });
+
+    setToggleStyle('btnWeather', d.weather_comp);
+    setToggleStyle('btnDefrost', d.defrost);
+    setToggleStyle('btnLegion', d.anti_legionella);
+  } catch (e) {
+    document.getElementById('connDot').className = "w-2 h-2 rounded-full bg-rose-500";
+  }
+}
+
+function setToggleStyle(id, active) {
+  const el = document.getElementById(id);
+  el.className = active
+    ? "py-2 px-2 rounded-xl text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+    : "py-2 px-2 rounded-xl text-[11px] font-semibold bg-slate-900/60 text-slate-400 border border-slate-800";
+}
+
+async function sendCmd(action, value) {
+  await fetch('/api/control', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({action, value})
+  });
+  fetchStatus();
+}
+
+function togglePower() { sendCmd('power', !currentState.power); setTimeout(fetchStats, 500); }
+function changeTemp(delta) { sendCmd('target_temp', (currentState.target_temp || 45) + delta); }
+function toggleExtra(key) { sendCmd(key, !currentState[key]); }
+
+async function fetchStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const s = await r.json();
+    
+    document.getElementById('dKwh').innerText = s.daily.kwh;
+    document.getElementById('dCop').innerText = s.daily.cop;
+    document.getElementById('dHrs').innerText = s.daily.hours;
+    document.getElementById('dUzs').innerText = s.daily.cost_uzs.toLocaleString() + " so'm";
+
+    document.getElementById('wKwh').innerText = s.weekly.kwh;
+    document.getElementById('wCop').innerText = s.weekly.cop;
+    document.getElementById('wHrs').innerText = s.weekly.hours;
+    document.getElementById('wUzs').innerText = s.weekly.cost_uzs.toLocaleString() + " so'm";
+
+    document.getElementById('mKwh').innerText = s.monthly.kwh;
+    document.getElementById('mCop').innerText = s.monthly.cop;
+    document.getElementById('mHrs').innerText = s.monthly.hours;
+    document.getElementById('mUzs').innerText = s.monthly.cost_uzs.toLocaleString() + " so'm";
+
+    const list = document.getElementById('sessionsList');
+    list.innerHTML = s.sessions.map(x => `
+      <div class="flex items-center justify-between bg-slate-900/70 px-3 py-2 rounded-xl border border-slate-800/80 text-xs">
+        <div>
+          <span class="font-bold text-slate-200">${x.start} - ${x.end}</span>
+          <span class="text-slate-400 ml-1">(${x.duration_min} daq)</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-orange-400 font-bold">${x.kwh} kWh</span>
+          <span class="text-sky-400">COP ${x.cop}</span>
+          <span class="text-red-400">${x.max_temp}°C</span>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
+// HAR 1 SEKUNDDA (1000 ms) REAL-TIME YANGILANISH
+setInterval(fetchStatus, 1000);
+setInterval(fetchStats, 5000);
+fetchStatus();
+fetchStats();
+</script>
+</body>
+</html>
