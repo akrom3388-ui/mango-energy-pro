@@ -2,8 +2,9 @@
   "appId": "uz.akrom.mangopro",
   "appName": "Mango Energy Pro",
   "webDir": "www",
-  "server": {
-    "url": "http://10.228.221.221:8050",
-    "cleartext": true
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
   }
 }
