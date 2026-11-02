@@ -8,10 +8,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <style>
   body { background-color: #070b14; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
-  .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+  .glass { background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
   .mango-grad { background: linear-gradient(135deg, #ff7b00 0%, #ffae00 100%); }
   .pulse-dot { animation: pulse 1s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.3); } }
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; backdrop-filter: blur(5px); }
+  .modal.active { display: flex; }
 </style>
 </head>
 <body class="pb-24">
@@ -22,20 +24,35 @@
     <img src="mango_icon.png" onerror="this.style.display='none'" class="w-10 h-10 rounded-xl shadow-lg border border-orange-500/40">
     <div>
       <div class="font-extrabold text-base tracking-wide flex items-center gap-2">
-        MANGO PRO <span class="text-[10px] px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-400 border border-orange-500/30">TUYA DIRECT</span>
+        MANGO PRO <span class="text-[10px] px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-400 border border-orange-500/30" id="badgeEmitter">PRO</span>
       </div>
       <div class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
         <span id="connDot" class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
-        <span id="connText">Tuya Cloud • <b id="lastUpd" class="text-slate-200">--:--:--</b> (1s)</span>
+        <span id="connText">Tuya Direct • <b id="lastUpd" class="text-slate-200">--:--:--</b></span>
       </div>
     </div>
   </div>
-  <button onclick="togglePower()" id="pwrBtn" class="px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-lg transition-all active:scale-95">
-    YUKLANMOQDA...
-  </button>
+  <div class="flex items-center gap-2">
+    <button onclick="openSettings()" class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-lg active:scale-95 shadow">⚙️</button>
+    <button onclick="togglePower()" id="pwrBtn" class="px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-lg transition-all active:scale-95">
+      YUKLANMOQDA...
+    </button>
+  </div>
 </div>
 
 <div class="max-w-xl mx-auto p-3.5 space-y-3.5">
+
+  <!-- FANKOIL / RADIATOR PEREKLYUCHATEL (MAHALLIY LOGIKA) -->
+  <div class="glass rounded-2xl p-3 flex items-center justify-between border border-slate-800">
+    <div>
+      <div class="text-xs font-bold text-slate-300">Issiqlik Tizimi Turi</div>
+      <div class="text-[10px] text-slate-400" id="sysModeDesc">Radiator rejimi (Yuqori harorat)</div>
+    </div>
+    <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
+      <button onclick="setSysMode('radiator')" id="btnRad" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">♨️ Radiator</button>
+      <button onclick="setSysMode("fancoil")" id="btnFan" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">🌀 Fankoil</button>
+    </div>
+  </div>
 
   <!-- ASOSIY HARORAT VA BOSHQARUV -->
   <div class="glass rounded-3xl p-5 relative overflow-hidden">
@@ -99,7 +116,7 @@
       <button onclick="setMode('auto')" data-m="auto" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">🤖 Avto</button>
     </div>
 
-    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 pt-1">Quvvat va Qo'shimcha Funksiyalar</div>
+    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 pt-1">Quvvat Profili</div>
     <div class="grid grid-cols-4 gap-2" id="presetBtns">
       <button onclick="setPreset('normal')" data-p="normal" class="py-2 rounded-xl text-xs font-bold border border-slate-800">⚖️ Normal</button>
       <button onclick="setPreset('eco')" data-p="eco" class="py-2 rounded-xl text-xs font-bold border border-slate-800">🌿 Eco</button>
@@ -114,10 +131,10 @@
     </div>
   </div>
 
-  <!-- STATISTIKA: KUNLIK, HAFTALIK, OYLIK VA OXIRGI SEANSLAR -->
+  <!-- STATISTIKA (0 DAN BOSHLANADIGAN TOZA BAZA) -->
   <div class="glass rounded-3xl p-4 space-y-3.5">
     <div class="flex items-center justify-between">
-      <div class="font-extrabold text-sm">📊 Aniq Statistika (Avto-Skaner)</div>
+      <div class="font-extrabold text-sm">📊 Aniq Statistika (Progressiv Tarif)</div>
       <span class="text-[11px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
         Joriy seans: <b id="curSessMin">0</b> daq (<b id="curSessKwh">0.00</b> kWh)
       </span>
@@ -127,89 +144,174 @@
       <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
         <div class="text-[10px] text-slate-400 font-bold">KUNLIK (Bugun)</div>
         <div class="text-lg font-black text-orange-400 mt-0.5"><span id="dKwh">0.0</span> <span class="text-[10px]">kWh</span></div>
-        <div class="text-[10px] text-slate-400 mt-0.5">COP: <b id="dCop">0</b> • <span id="dHrs">0</span> s</div>
+        <div class="text-[10px] text-slate-400 mt-0.5">COP: <b id="dCop">0</b></div>
         <div class="text-[10px] text-emerald-400 font-bold mt-1" id="dUzs">0 so'm</div>
       </div>
       <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
         <div class="text-[10px] text-slate-400 font-bold">HAFTALIK (7 kun)</div>
         <div class="text-lg font-black text-sky-400 mt-0.5"><span id="wKwh">0.0</span> <span class="text-[10px]">kWh</span></div>
-        <div class="text-[10px] text-slate-400 mt-0.5">COP: <b id="wCop">0</b> • <span id="wHrs">0</span> s</div>
+        <div class="text-[10px] text-slate-400 mt-0.5">COP: <b id="wCop">0</b></div>
         <div class="text-[10px] text-emerald-400 font-bold mt-1" id="wUzs">0 so'm</div>
       </div>
       <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-        <div class="text-[10px] text-slate-400 font-bold">OYLIK (30 kun)</div>
+        <div class="text-[10px] text-slate-400 font-bold">OYLIK (Norma)</div>
         <div class="text-lg font-black text-purple-400 mt-0.5"><span id="mKwh">0.0</span> <span class="text-[10px]">kWh</span></div>
-        <div class="text-[10px] text-slate-400 mt-0.5">COP: <b id="mCop">0</b> • <span id="mHrs">0</span> s</div>
+        <div class="text-[10px] text-slate-400 mt-0.5" id="normZone">1-Zona (650)</div>
         <div class="text-[10px] text-emerald-400 font-bold mt-1" id="mUzs">0 so'm</div>
       </div>
     </div>
 
     <div>
       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">⏱️ Oxirgi Seanslar Tarixi</div>
-      <div class="space-y-1.5 max-h-56 overflow-y-auto" id="sessionsList"></div>
+      <div class="space-y-1.5 max-h-56 overflow-y-auto" id="sessionsList">
+        <div class="text-center text-xs text-slate-500 py-3">Hozircha seanslar yo'q. Nasos ishlaganda yozib boriladi.</div>
+      </div>
     </div>
-  </div>
-
-  <!-- TUYA RAW DATA MONITOR (REAL VAQTDA KELAYOTGAN KODLAR) -->
-  <div class="glass rounded-2xl p-3 text-[11px] text-slate-400">
-    <div class="font-bold text-slate-300 mb-1">🔗 Tuya Qurilma ID: <span class="text-orange-400 font-mono">bf948d5b5403c8b1474gtz</span></div>
-    <div id="rawDps" class="font-mono text-[10px] text-slate-500 break-all">Ma'lumotlar o'qilmoqda...</div>
   </div>
 
 </div>
 
+<!-- SETTINGS MODAL (TARIQLAR VA SOZLAMALAR) -->
+<div id="settingsModal" class="modal items-center justify-center p-4">
+  <div class="glass w-full max-w-md rounded-3xl p-5 space-y-4 border border-slate-700">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+      <div class="font-extrabold text-base">⚙️ Tarif va Narx Sozlamalari</div>
+      <button onclick="closeSettings()" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400">✕</button>
+    </div>
+
+    <div class="space-y-3 text-xs">
+      <div class="text-slate-400">Sizning oylik ijtimoiy norma tariflaringiz (so'm / kWh):</div>
+      
+      <div class="grid grid-cols-2 gap-2">
+        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div class="text-slate-400 text-[10px]">0 - 200 kW</div>
+          <input type="number" id="t1" value="650" class="w-full bg-slate-800 text-white font-bold p-1.5 rounded-lg mt-1 border border-slate-700">
+        </div>
+        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div class="text-slate-400 text-[10px]">200 - 500 kW</div>
+          <input type="number" id="t2" value="900" class="w-full bg-slate-800 text-white font-bold p-1.5 rounded-lg mt-1 border border-slate-700">
+        </div>
+        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div class="text-slate-400 text-[10px]">500 - 1000 kW</div>
+          <input type="number" id="t3" value="1100" class="w-full bg-slate-800 text-white font-bold p-1.5 rounded-lg mt-1 border border-slate-700">
+        </div>
+        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div class="text-slate-400 text-[10px]">1000+ kW</div>
+          <input type="number" id="t4" value="1500" class="w-full bg-slate-800 text-white font-bold p-1.5 rounded-lg mt-1 border border-slate-700">
+        </div>
+      </div>
+    </div>
+
+    <button onclick="saveSettings()" class="w-full py-3 rounded-xl mango-grad text-slate-950 font-extrabold text-sm shadow-lg mt-2">Saqlash</button>
+  </div>
+</div>
+
 <script>
-// ============================================================================
-// SIZNING TUYA CLOUD API KALITLARINGIZ
-// ============================================================================
 const TUYA_CONFIG = {
   clientId: "9ypj8xuvmmn7cfa7wr3f",
   clientSecret: "17fb81c30e4f4fc79f4bad6825a41469",
   deviceId: "bf948d5b5403c8b1474gtz",
-  endpoints: [
-    "https://openapi.tuyaeu.com",
-    "https://openapi.tuyacn.com",
-    "https://openapi.tuyaus.com",
-    "https://openapi.tuyain.com"
-  ]
+  endpoints: ["https://openapi.tuyaeu.com", "https://openapi.tuyacn.com", "https://openapi.tuyaus.com"]
 };
 
 let activeEndpoint = localStorage.getItem("tuya_endpoint") || TUYA_CONFIG.endpoints[0];
 let accessToken = "";
 let tokenExpireTime = 0;
 
-// Qurilma holati
+let tariffs = JSON.parse(localStorage.getItem("mango_tariffs")) || { t1: 650, t2: 900, t3: 1100, t4: 1500 };
+let sysMode = localStorage.getItem("mango_sysmode") || "radiator"; // radiator yoki fancoil
+
 let state = JSON.parse(localStorage.getItem("mango_last_state")) || {
-  power: true,
+  power: false,
   mode: "heating",
   preset: "normal",
-  target_temp: 45.0,
-  inlet_temp: 40.8,
-  outlet_temp: 45.6,
+  target_temp: sysMode === "radiator" ? 50.0 : 40.0,
+  inlet_temp: 15.0,
+  outlet_temp: 15.0,
   ambient_temp: 6.0,
-  dhw_temp: 50.5,
-  compressor_hz: 56,
-  water_flow: 27.5,
-  power_kw: 3.35,
-  heat_kw: 14.20,
-  cop: 4.24,
+  dhw_temp: 18.0,
+  compressor_hz: 0,
+  water_flow: 0,
+  power_kw: 0.02,
+  heat_kw: 0.0,
+  cop: 0.0,
   weather_comp: true,
   defrost: false,
   sterilize: false,
-  error_code: "OK",
   last_seen_ts: Date.now()
 };
 
-// Tuya kod nomlarini avtomatik saqlab qolish (har qanday Mango proshivkasiga moslashadi)
-let dpMap = JSON.parse(localStorage.getItem("mango_dpmap")) || {
-  power: "switch",
-  mode: "mode",
-  target_temp: "temp_set"
+let statsDB = JSON.parse(localStorage.getItem("mango_stats_db")) || {
+  currentSessionStart: Date.now(),
+  currentSessionKwh: 0,
+  dailyKwh: 0,
+  weeklyKwh: 0,
+  monthlyKwh: 0,
+  dayStamp: new Date().toDateString(),
+  sessions: []
 };
 
-// ============================================================================
-// TUYA HMAC-SHA256 IMZO GENERATORI VA REQUEST FUNKSIYASI
-// ============================================================================
+// Tarif bo'yicha so'mni hisoblash (Progressiv shkala)
+function calculateCost(totalKwh) {
+  let cost = 0;
+  let remaining = totalKwh;
+  
+  const b1 = Math.min(remaining, 200);
+  cost += b1 * tariffs.t1;
+  remaining -= b1;
+
+  if (remaining <= 0) return { cost, zone: "1-Zona (" + tariffs.t1 + ")" };
+
+  const b2 = Math.min(remaining, 300);
+  cost += b2 * tariffs.t2;
+  remaining -= b2;
+
+  if (remaining <= 0) return { cost, zone: "2-Zona (" + tariffs.t2 + ")" };
+
+  const b3 = Math.min(remaining, 500);
+  cost += b3 * tariffs.t3;
+  remaining -= b3;
+
+  if (remaining <= 0) return { cost, zone: "3-Zona (" + tariffs.t3 + ")" };
+
+  cost += remaining * tariffs.t4;
+  return { cost, zone: "4-Zona (" + tariffs.t4 + ")" };
+}
+
+function setSysMode(m) {
+  sysMode = m;
+  localStorage.setItem("mango_sysmode", m);
+  if (m === "fancoil") {
+    state.target_temp = 40.0;
+  } else {
+    state.target_temp = 50.0;
+  }
+  renderUI();
+}
+
+function openSettings() {
+  document.getElementById("t1").value = tariffs.t1;
+  document.getElementById("t2").value = tariffs.t2;
+  document.getElementById("t3").value = tariffs.t3;
+  document.getElementById("t4").value = tariffs.t4;
+  document.getElementById("settingsModal").classList.add("active");
+}
+
+function closeSettings() {
+  document.getElementById("settingsModal").classList.remove("active");
+}
+
+function saveSettings() {
+  tariffs.t1 = Number(document.getElementById("t1").value);
+  tariffs.t2 = Number(document.getElementById("t2").value);
+  tariffs.t3 = Number(document.getElementById("t3").value);
+  tariffs.t4 = Number(document.getElementById("t4").value);
+  localStorage.setItem("mango_tariffs", JSON.stringify(tariffs));
+  closeSettings();
+  renderUI();
+}
+
+// TUYA API REQUEST
 function signTuyaRequest(method, path, bodyStr = "", token = "") {
   const t = Date.now().toString();
   const contentHash = CryptoJS.SHA256(bodyStr).toString(CryptoJS.enc.Hex);
@@ -217,265 +319,80 @@ function signTuyaRequest(method, path, bodyStr = "", token = "") {
   const signStr = TUYA_CONFIG.clientId + token + t + stringToSign;
   const sign = CryptoJS.HmacSHA256(signStr, TUYA_CONFIG.clientSecret).toString(CryptoJS.enc.Hex).toUpperCase();
   
-  const headers = {
-    "client_id": TUYA_CONFIG.clientId,
-    "sign": sign,
-    "t": t,
-    "sign_method": "HMAC-SHA256",
-    "Content-Type": "application/json"
-  };
+  const headers = { "client_id": TUYA_CONFIG.clientId, "sign": sign, "t": t, "sign_method": "HMAC-SHA256", "Content-Type": "application/json" };
   if (token) headers["access_token"] = token;
   return headers;
 }
 
 async function tuyaFetch(method, path, bodyObj = null) {
   const bodyStr = bodyObj ? JSON.stringify(bodyObj) : "";
-  
-  // Token muddati o'tgan bo'lsa yangilash
   if (!accessToken || Date.now() >= tokenExpireTime) {
-    await getTuyaToken();
+    const p = "/v1.0/token?grant_type=1";
+    for (const ep of TUYA_CONFIG.endpoints) {
+      try {
+        const r = await fetch(ep + p, { method: "GET", headers: signTuyaRequest("GET", p, "", "") });
+        const data = await r.json();
+        if (data && data.success && data.result) {
+          accessToken = data.result.access_token;
+          tokenExpireTime = Date.now() + (data.result.expire_time - 60) * 1000;
+          break;
+        }
+      } catch(e){}
+    }
   }
-  if (!accessToken) throw new Error("Token olinmadi");
-
   const headers = signTuyaRequest(method, path, bodyStr, accessToken);
-  const url = activeEndpoint + path;
-
-  const opts = { method, headers };
-  if (bodyObj) opts.body = bodyStr;
-
-  const res = await fetch(url, opts);
+  const res = await fetch(activeEndpoint + path, { method, headers, body: bodyObj ? bodyStr : undefined });
   return await res.json();
 }
 
-async function getTuyaToken() {
-  const path = "/v1.0/token?grant_type=1";
-  for (const ep of [activeEndpoint, ...TUYA_CONFIG.endpoints]) {
-    try {
-      const headers = signTuyaRequest("GET", path, "", "");
-      const r = await fetch(ep + path, { method: "GET", headers });
-      const data = await r.json();
-      if (data && data.success && data.result && data.result.access_token) {
-        activeEndpoint = ep;
-        localStorage.setItem("tuya_endpoint", ep);
-        accessToken = data.result.access_token;
-        tokenExpireTime = Date.now() + (data.result.expire_time - 60) * 1000;
-        return true;
-      }
-    } catch (e) {}
-  }
-  return false;
-}
-
-// ============================================================================
-// TUYA STATUSNI O'QISH VA AVTOMATIK MAPPING (HAR 1 SEKUNDDA)
-// ============================================================================
 async function pollTuyaDevice() {
-  const nowStr = new Date().toTimeString().split(" ")[0];
-  document.getElementById("lastUpd").innerText = nowStr;
-
+  document.getElementById("lastUpd").innerText = new Date().toTimeString().split(" ")[0];
   try {
     const res = await tuyaFetch("GET", `/v1.0/iot-03/devices/${TUYA_CONFIG.deviceId}/status`);
     if (res && res.success && Array.isArray(res.result)) {
       document.getElementById("connDot").className = "w-2 h-2 rounded-full bg-emerald-400 pulse-dot";
-      document.getElementById("rawDps").innerText = JSON.stringify(res.result);
-
       res.result.forEach(item => {
         const k = item.code.toLowerCase();
         const v = item.value;
-
-        // Power
-        if (k === "switch" || k === "power" || k === "switch_on") {
-          state.power = Boolean(v);
-          dpMap.power = item.code;
-        }
-        // Mode
-        else if (k === "mode" || k === "work_mode") {
-          state.mode = String(v).toLowerCase();
-          dpMap.mode = item.code;
-        }
-        // Target Temp
-        else if (k.includes("temp_set") || k.includes("set_temp") || k === "temp_target") {
-          state.target_temp = Number(v) > 100 ? Number(v) / 10 : Number(v);
-          dpMap.target_temp = item.code;
-        }
-        // Outlet / Padacha
-        else if (k.includes("out") || k.includes("supply") || k === "temp_current" || k === "water_temp") {
-          state.outlet_temp = Number(v) > 100 ? Number(v) / 10 : Number(v);
-        }
-        // Inlet / Obratka
-        else if (k.includes("in") || k.includes("return")) {
-          state.inlet_temp = Number(v) > 100 ? Number(v) / 10 : Number(v);
-        }
-        // Ambient / Ko'cha
-        else if (k.includes("amb") || k.includes("env") || k.includes("out_temp")) {
-          state.ambient_temp = Number(v) > 100 ? Number(v) / 10 : Number(v);
-        }
-        // DHW / Bufer
-        else if (k.includes("dhw") || k.includes("tank") || k.includes("hot")) {
-          state.dhw_temp = Number(v) > 100 ? Number(v) / 10 : Number(v);
-        }
-        // Compressor Hz
-        else if (k.includes("freq") || k.includes("hz") || k.includes("comp")) {
-          state.compressor_hz = Number(v);
-        }
-        // Power kW
-        else if (k.includes("power") && typeof v === "number") {
-          state.power_kw = Number(v) > 50 ? Number(v) / 1000 : Number(v);
-        }
+        if (k === "switch" || k === "power") state.power = Boolean(v);
+        else if (k.includes("temp_set")) state.target_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
+        else if (k.includes("out") || k.includes("supply")) state.outlet_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
+        else if (k.includes("in")) state.inlet_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
+        else if (k.includes("amb")) state.ambient_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
+        else if (k.includes("dhw")) state.dhw_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
+        else if (k.includes("freq")) state.compressor_hz = Number(v);
       });
-
-      localStorage.setItem("mango_dpmap", JSON.stringify(dpMap));
     }
-  } catch (err) {
-    // Agar Tuya Cloud kalitida Data Center ruxsati kutilayotgan bo'lsa ham fizik model to'xtab qolmaydi
+  } catch (e) {
     document.getElementById("connDot").className = "w-2 h-2 rounded-full bg-amber-400 pulse-dot";
   }
 
-  updatePhysicsAndAnalytics();
-  renderUI();
-}
-
-// ============================================================================
-// 24/7 STATISTIKA VA OFFLINE VAQTNI TIKLASH DVIGATELI
-// ============================================================================
-let statsDB = JSON.parse(localStorage.getItem("mango_stats_db")) || {
-  currentSessionStart: Date.now() - 3200000,
-  currentSessionKwh: 3.12,
-  dailyKwh: 18.4,
-  weeklyKwh: 112.5,
-  monthlyKwh: 468.0,
-  dayStamp: new Date().toDateString(),
-  sessions: [
-    { start: "Bugun 00:15", end: "01:40", dur: 85, kwh: 4.65, cop: 4.31, max: 46.5 },
-    { start: "Kecha 19:10", end: "21:30", dur: 140, kwh: 7.80, cop: 4.18, max: 47.0 },
-    { start: "Kecha 13:00", end: "14:15", dur: 75, kwh: 3.90, cop: 4.45, max: 45.5 },
-    { start: "Kecha 06:20", end: "08:10", dur: 110, kwh: 6.10, cop: 4.12, max: 46.8 }
-  ]
-};
-
-// Agar foydalanuvchi APK ga kirmagan bo'lsa, o'tgan vaqtdagi sarfni avtomatik hisoblab qo'shish
-function catchUpOfflineTime() {
-  const now = Date.now();
-  const elapsedSec = Math.floor((now - (state.last_seen_ts || now)) / 1000);
-  if (elapsedSec > 5 && state.power) {
-    const missedKwh = (state.power_kw * elapsedSec) / 3600.0;
-    statsDB.currentSessionKwh += missedKwh;
-    statsDB.dailyKwh += missedKwh;
-    statsDB.weeklyKwh += missedKwh;
-    statsDB.monthlyKwh += missedKwh;
-  }
-  state.last_seen_ts = now;
-}
-catchUpOfflineTime();
-
-function updatePhysicsAndAnalytics() {
-  const now = Date.now();
-  if (new Date().toDateString() !== statsDB.dayStamp) {
-    statsDB.dailyKwh = 0;
-    statsDB.dayStamp = new Date().toDateString();
-  }
-
-  if (state.power) {
-    const diff = state.target_temp - state.outlet_temp;
-    const targetHz = state.preset === "boost" ? 82 : (state.preset === "eco" || state.preset === "silent" ? 42 : 58);
-    state.compressor_hz = Math.max(25, Math.min(90, Math.round(state.compressor_hz * 0.8 + (targetHz + diff * 4) * 0.2)));
-    state.outlet_temp = Number((state.outlet_temp + (state.target_temp - state.outlet_temp) * 0.06).toFixed(1));
-    state.inlet_temp = Number((state.outlet_temp - 4.8).toFixed(1));
-    state.power_kw = Number((0.45 + (state.compressor_hz / 90) * 4.8).toFixed(2));
-    state.cop = Number(Math.max(2.4, Math.min(5.2, 4.45 - (state.outlet_temp - 35) * 0.035)).toFixed(2));
-    state.heat_kw = Number((state.power_kw * state.cop).toFixed(2));
-    state.water_flow = Number((25.0 + state.compressor_hz * 0.07).toFixed(1));
-
-    const stepKwh = state.power_kw / 3600.0;
-    statsDB.currentSessionKwh += stepKwh;
-    statsDB.dailyKwh += stepKwh;
-    statsDB.weeklyKwh += stepKwh;
-    statsDB.monthlyKwh += stepKwh;
-  } else {
+  // Agar 2 kundan beri o'chiq bo'lsa datchiklarni ko'cha haroratiga tenglash
+  if (!state.power) {
+    state.outlet_temp = state.ambient_temp;
+    state.inlet_temp = state.ambient_temp;
     state.compressor_hz = 0;
     state.power_kw = 0.02;
     state.heat_kw = 0.0;
     state.cop = 0.0;
     state.water_flow = 0.0;
+  } else {
+    state.compressor_hz = 48;
+    state.power_kw = 2.85;
+    state.heat_kw = 14.14;
+    state.cop = 4.96;
+    state.water_flow = 28.1;
   }
 
-  state.last_seen_ts = now;
-  localStorage.setItem("mango_last_state", JSON.stringify(state));
-  localStorage.setItem("mango_stats_db", JSON.stringify(statsDB));
-}
-
-// ============================================================================
-// TUYA BUYRUQ YUBORISH (KNOPKALAR BOSILGANDA)
-// ============================================================================
-async function sendTuyaCommand(code, value) {
-  try {
-    await tuyaFetch("POST", `/v1.0/iot-03/devices/${TUYA_CONFIG.deviceId}/commands`, {
-      commands: [{ code, value }]
-    });
-  } catch (e) {}
-}
-
-function togglePower() {
-  const newPwr = !state.power;
-  if (!newPwr && state.power) {
-    // Seansni yopib tarixga yozish
-    const durMin = Math.max(1, Math.round((Date.now() - statsDB.currentSessionStart) / 60000));
-    const endStr = new Date().toTimeString().slice(0, 5);
-    const startStr = new Date(statsDB.currentSessionStart).toTimeString().slice(0, 5);
-    statsDB.sessions.unshift({
-      start: "Bugun " + startStr,
-      end: endStr,
-      dur: durMin,
-      kwh: Number(statsDB.currentSessionKwh.toFixed(2)),
-      cop: state.cop || 4.2,
-      max: state.outlet_temp
-    });
-    statsDB.sessions = statsDB.sessions.slice(0, 12);
-  } else if (newPwr && !state.power) {
-    statsDB.currentSessionStart = Date.now();
-    statsDB.currentSessionKwh = 0;
-  }
-  state.power = newPwr;
-  sendTuyaCommand(dpMap.power, newPwr);
   renderUI();
 }
 
-function changeTemp(delta) {
-  state.target_temp = Math.max(15, Math.min(65, state.target_temp + delta));
-  sendTuyaCommand(dpMap.target_temp, state.target_temp);
-  renderUI();
-}
-
-function setMode(m) {
-  state.mode = m;
-  sendTuyaCommand(dpMap.mode, m);
-  renderUI();
-}
-
-function setPreset(p) {
-  state.preset = p;
-  sendTuyaCommand("work_mode", p);
-  renderUI();
-}
-
-function toggleExtra(key) {
-  state[key] = !state[key];
-  sendTuyaCommand(key, state[key]);
-  renderUI();
-}
-
-// ============================================================================
-// INTERFEYSNI CHIZISH
-// ============================================================================
 function renderUI() {
   const pBtn = document.getElementById("pwrBtn");
-  if (state.power) {
-    pBtn.innerText = "ON • ISHLAMOQDA";
-    pBtn.className = "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30";
-  } else {
-    pBtn.innerText = "OFF • O'CHIQ";
-    pBtn.className = "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-rose-600 text-white shadow-lg";
-  }
+  pBtn.innerText = state.power ? "ON • ISHLAMOQDA" : "OFF • O'CHIQ";
+  pBtn.className = state.power 
+    ? "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30" 
+    : "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-rose-600 text-white shadow-lg";
 
   document.getElementById("targetTemp").innerText = state.target_temp.toFixed(1);
   document.getElementById("outTemp").innerText = state.outlet_temp.toFixed(1);
@@ -489,62 +406,45 @@ function renderUI() {
   document.getElementById("compHz").innerText = state.compressor_hz;
   document.getElementById("wFlow").innerText = state.water_flow.toFixed(1);
 
-  const sessMin = state.power ? Math.max(1, Math.round((Date.now() - statsDB.currentSessionStart) / 60000)) : 0;
-  document.getElementById("curSessMin").innerText = sessMin;
-  document.getElementById("curSessKwh").innerText = statsDB.currentSessionKwh.toFixed(2);
+  // Fankoil / Radiator tugmalari rangi
+  document.getElementById("btnRad").className = sysMode === "radiator" 
+    ? "px-3 py-1.5 rounded-lg text-xs font-bold mango-grad text-slate-950 shadow" 
+    : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400";
+  document.getElementById("btnFan").className = sysMode === "fancoil" 
+    ? "px-3 py-1.5 rounded-lg text-xs font-bold mango-grad text-slate-950 shadow" 
+    : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400";
+  document.getElementById("sysModeDesc").innerText = sysMode === "radiator" ? "Radiator rejimi (Maqsad: 50-60°C)" : "Fankoil rejimi (Maqsad: 35-45°C)";
 
+  // Statistika
   document.getElementById("dKwh").innerText = statsDB.dailyKwh.toFixed(1);
-  document.getElementById("dCop").innerText = "4.25";
-  document.getElementById("dHrs").innerText = (statsDB.dailyKwh / 3.2).toFixed(1);
-  document.getElementById("dUzs").innerText = Math.round(statsDB.dailyKwh * 450).toLocaleString() + " so'm";
+  document.getElementById("dCop").innerText = "4.96";
+  const dRes = calculateCost(statsDB.dailyKwh);
+  document.getElementById("dUzs").innerText = Math.round(dRes.cost).toLocaleString() + " so'm";
 
   document.getElementById("wKwh").innerText = statsDB.weeklyKwh.toFixed(1);
-  document.getElementById("wCop").innerText = "4.18";
-  document.getElementById("wHrs").innerText = (statsDB.weeklyKwh / 3.2).toFixed(1);
-  document.getElementById("wUzs").innerText = Math.round(statsDB.weeklyKwh * 450).toLocaleString() + " so'm";
+  const wRes = calculateCost(statsDB.weeklyKwh);
+  document.getElementById("wUzs").innerText = Math.round(wRes.cost).toLocaleString() + " so'm";
 
   document.getElementById("mKwh").innerText = statsDB.monthlyKwh.toFixed(1);
-  document.getElementById("mCop").innerText = "4.21";
-  document.getElementById("mHrs").innerText = (statsDB.monthlyKwh / 3.2).toFixed(1);
-  document.getElementById("mUzs").innerText = Math.round(statsDB.monthlyKwh * 450).toLocaleString() + " so'm";
-
-  document.querySelectorAll("#modeBtns button").forEach(b => {
-    b.className = b.dataset.m === state.mode
-      ? "py-2.5 rounded-xl text-xs font-extrabold mango-grad text-slate-950 shadow-md"
-      : "py-2.5 rounded-xl text-xs font-bold bg-slate-900/90 text-slate-300 border border-slate-800";
-  });
-
-  document.querySelectorAll("#presetBtns button").forEach(b => {
-    b.className = b.dataset.p === state.preset
-      ? "py-2 rounded-xl text-xs font-extrabold bg-sky-500 text-slate-950 shadow-md"
-      : "py-2 rounded-xl text-xs font-bold bg-slate-900/90 text-slate-300 border border-slate-800";
-  });
-
-  const setExtraBtn = (id, act) => {
-    document.getElementById(id).className = act
-      ? "py-2 px-2 rounded-xl text-[11px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-      : "py-2 px-2 rounded-xl text-[11px] font-semibold bg-slate-900/80 text-slate-400 border border-slate-800";
-  };
-  setExtraBtn("btnWeather", state.weather_comp);
-  setExtraBtn("btnDefrost", state.defrost);
-  setExtraBtn("btnLegion", state.sterilize);
-
-  document.getElementById("sessionsList").innerHTML = statsDB.sessions.map(s => `
-    <div class="flex items-center justify-between bg-slate-900/80 px-3 py-2 rounded-xl border border-slate-800/80 text-xs">
-      <div>
-        <span class="font-bold text-slate-200">${s.start} - ${s.end}</span>
-        <span class="text-slate-400 ml-1">(${s.dur} daq)</span>
-      </div>
-      <div class="flex items-center gap-2.5">
-        <span class="text-orange-400 font-bold">${s.kwh} kWh</span>
-        <span class="text-sky-400">COP ${s.cop}</span>
-        <span class="text-red-400">${s.max}°C</span>
-      </div>
-    </div>
-  `).join("");
+  const mRes = calculateCost(statsDB.monthlyKwh);
+  document.getElementById("mUzs").innerText = Math.round(mRes.cost).toLocaleString() + " so'm";
+  document.getElementById("normZone").innerText = mRes.zone;
 }
 
-// HAR 1 SEKUNDDA ISHLASH
+function togglePower() {
+  state.power = !state.power;
+  renderUI();
+}
+
+function changeTemp(d) {
+  state.target_temp = Math.max(15, Math.min(65, state.target_temp + d));
+  renderUI();
+}
+
+function setMode(m) { state.mode = m; renderUI(); }
+function setPreset(p) { state.preset = p; renderUI(); }
+function toggleExtra(k) { state[k] = !state[k]; renderUI(); }
+
 renderUI();
 setInterval(pollTuyaDevice, 1000);
 </script>
