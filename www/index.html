@@ -1,452 +1,467 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mango Energy Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script src="crypto-js.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js';document.head.appendChild(s);"></script>
 <style>
-  body { background-color: #070b14; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
-  .glass { background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
-  .mango-grad { background: linear-gradient(135deg, #ff7b00 0%, #ffae00 100%); }
-  .pulse-dot { animation: pulse 1s infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.3); } }
-  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; backdrop-filter: blur(5px); }
-  .modal.active { display: flex; }
+  body { background:#070b14; color:#f8fafc; font-family:system-ui,-apple-system,sans-serif; user-select:none; -webkit-tap-highlight-color:transparent; }
+  .glass { background:rgba(15,23,42,.88); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.08); }
+  .mango-grad { background:linear-gradient(135deg,#ff7b00 0%,#ffae00 100%); color:#020617; }
+  .pulse-dot { animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(1.3)} }
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:100; backdrop-filter:blur(5px); overflow-y:auto; }
+  .modal.active { display:flex; }
+  .opt { border:1px solid #1e293b; color:#cbd5e1; }
+  .opt.on { background:linear-gradient(135deg,#ff7b00,#ffae00); color:#020617; border-color:transparent; }
+  .inp { width:100%; background:#1e293b; color:#fff; font-weight:700; padding:6px; border-radius:8px; margin-top:4px; border:1px solid #334155; user-select:text; }
+  #toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:200; display:none; }
 </style>
 </head>
 <body class="pb-24">
 
-<!-- TOP BAR -->
 <div class="sticky top-0 z-50 glass px-4 py-3 flex items-center justify-between border-b border-slate-800/80">
   <div class="flex items-center gap-3">
-    <img src="mango_icon.png" onerror="this.style.display='none'" class="w-10 h-10 rounded-xl shadow-lg border border-orange-500/40">
+    <img src="mango_icon.png" onerror="this.style.display='none'" class="w-10 h-10 rounded-xl border border-orange-500/40">
     <div>
-      <div class="font-extrabold text-base tracking-wide flex items-center gap-2">
-        MANGO PRO <span class="text-[10px] px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-400 border border-orange-500/30" id="badgeEmitter">PRO</span>
-      </div>
+      <div class="font-extrabold text-base tracking-wide">MANGO PRO</div>
       <div class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-        <span id="connDot" class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
-        <span id="connText">Tuya Direct • <b id="lastUpd" class="text-slate-200">--:--:--</b></span>
+        <span id="connDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span id="connText">Ulanmoqda...</span> <b id="lastUpd" class="text-slate-200">--:--:--</b>
       </div>
     </div>
   </div>
   <div class="flex items-center gap-2">
-    <button onclick="openSettings()" class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-lg active:scale-95 shadow">⚙️</button>
-    <button onclick="togglePower()" id="pwrBtn" class="px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-lg transition-all active:scale-95">
-      YUKLANMOQDA...
-    </button>
+    <button onclick="openSettings()" class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 text-lg active:scale-95">⚙️</button>
+    <button onclick="togglePower()" id="pwrBtn" class="px-4 py-2.5 rounded-xl font-extrabold text-xs active:scale-95">...</button>
   </div>
 </div>
 
 <div class="max-w-xl mx-auto p-3.5 space-y-3.5">
 
-  <!-- FANKOIL / RADIATOR PEREKLYUCHATEL (MAHALLIY LOGIKA) -->
-  <div class="glass rounded-2xl p-3 flex items-center justify-between border border-slate-800">
+  <div class="glass rounded-2xl p-3 flex items-center justify-between">
     <div>
-      <div class="text-xs font-bold text-slate-300">Issiqlik Tizimi Turi</div>
-      <div class="text-[10px] text-slate-400" id="sysModeDesc">Radiator rejimi (Yuqori harorat)</div>
+      <div class="text-xs font-bold text-slate-300">Issiqlik tizimi turi</div>
+      <div class="text-[10px] text-slate-400" id="sysModeDesc"></div>
     </div>
     <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
-      <button onclick="setSysMode('radiator')" id="btnRad" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">♨️ Radiator</button>
-      <button onclick="setSysMode("fancoil")" id="btnFan" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">🌀 Fankoil</button>
+      <button onclick="setSysMode('radiator')" id="btnRad" class="px-3 py-1.5 rounded-lg text-xs font-bold">♨️ Radiator</button>
+      <button onclick="setSysMode('fancoil')" id="btnFan" class="px-3 py-1.5 rounded-lg text-xs font-bold">🌀 Fankoil</button>
     </div>
   </div>
 
-  <!-- ASOSIY HARORAT VA BOSHQARUV -->
-  <div class="glass rounded-3xl p-5 relative overflow-hidden">
+  <div class="glass rounded-3xl p-5">
     <div class="flex justify-between items-center mb-4">
       <div>
-        <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Maqsadli Harorat (Set Temp)</span>
-        <div class="text-4xl font-black text-orange-400 mt-0.5"><span id="targetTemp">45.0</span>°C</div>
+        <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Maqsadli harorat</span>
+        <div class="text-4xl font-black text-orange-400 mt-0.5"><span id="targetTemp">--</span>°C</div>
       </div>
       <div class="flex items-center gap-2.5">
-        <button onclick="changeTemp(-1)" class="w-12 h-12 rounded-2xl bg-slate-800 active:scale-90 text-2xl font-bold border border-slate-700 shadow">-</button>
-        <button onclick="changeTemp(1)" class="w-12 h-12 rounded-2xl mango-grad text-slate-950 active:scale-90 text-2xl font-black shadow-lg shadow-orange-500/20">+</button>
+        <button onclick="changeTemp(-1)" class="w-12 h-12 rounded-2xl bg-slate-800 active:scale-90 text-2xl font-bold border border-slate-700">-</button>
+        <button onclick="changeTemp(1)" class="w-12 h-12 rounded-2xl mango-grad active:scale-90 text-2xl font-black">+</button>
       </div>
     </div>
-
     <div class="grid grid-cols-4 gap-2 text-center pt-3 border-t border-slate-800/80">
-      <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800/60">
-        <div class="text-[10px] text-slate-400">Padacha</div>
-        <div class="text-base font-extrabold text-red-400 mt-0.5"><span id="outTemp">--</span>°C</div>
-      </div>
-      <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800/60">
-        <div class="text-[10px] text-slate-400">Obratka</div>
-        <div class="text-base font-extrabold text-sky-400 mt-0.5"><span id="inTemp">--</span>°C</div>
-      </div>
-      <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800/60">
-        <div class="text-[10px] text-slate-400">Bufer/GVS</div>
-        <div class="text-base font-extrabold text-amber-400 mt-0.5"><span id="dhwTemp">--</span>°C</div>
-      </div>
-      <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800/60">
-        <div class="text-[10px] text-slate-400">Ko'cha</div>
-        <div class="text-base font-extrabold text-emerald-400 mt-0.5"><span id="ambTemp">--</span>°C</div>
-      </div>
+      <div class="bg-slate-900/90 p-2.5 rounded-2xl"><div class="text-[10px] text-slate-400">Padacha</div><div class="text-base font-extrabold text-red-400"><span id="outTemp">--</span>°</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-2xl"><div class="text-[10px] text-slate-400">Obratka</div><div class="text-base font-extrabold text-sky-400"><span id="inTemp">--</span>°</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-2xl"><div class="text-[10px] text-slate-400">GVS</div><div class="text-base font-extrabold text-amber-400"><span id="dhwTemp">--</span>°</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-2xl"><div class="text-[10px] text-slate-400">Ko'cha</div><div class="text-base font-extrabold text-emerald-400"><span id="ambTemp">--</span>°</div></div>
     </div>
   </div>
 
-  <!-- JONLI TELEMETRIYA -->
   <div class="grid grid-cols-3 gap-2.5">
     <div class="glass p-3.5 rounded-2xl">
-      <div class="text-[11px] text-slate-400">Elektr Quvvati</div>
-      <div class="text-xl font-black text-white mt-0.5"><span id="pwrKw">0.00</span> <span class="text-xs font-normal text-slate-400">kW</span></div>
+      <div class="text-[11px] text-slate-400">Elektr <span id="estTag" class="text-amber-400"></span></div>
+      <div class="text-xl font-black mt-0.5"><span id="pwrKw">0.00</span> <span class="text-xs font-normal text-slate-400">kW</span></div>
       <div class="text-[11px] text-orange-400 mt-1">Kompr: <span id="compHz">0</span> Hz</div>
     </div>
     <div class="glass p-3.5 rounded-2xl">
-      <div class="text-[11px] text-slate-400">Issiqlik Quvvati</div>
+      <div class="text-[11px] text-slate-400">Issiqlik</div>
       <div class="text-xl font-black text-emerald-400 mt-0.5"><span id="heatKw">0.00</span> <span class="text-xs font-normal text-slate-400">kW</span></div>
       <div class="text-[11px] text-slate-400 mt-1">Oqim: <span id="wFlow">0</span> L/m</div>
     </div>
     <div class="glass p-3.5 rounded-2xl">
-      <div class="text-[11px] text-slate-400">Samaradorlik (COP)</div>
+      <div class="text-[11px] text-slate-400">COP</div>
       <div class="text-xl font-black text-sky-400 mt-0.5">x<span id="copVal">0.00</span></div>
-      <div class="text-[11px] text-slate-400 mt-1">Holat: <span id="errCode" class="text-emerald-400 font-bold">OK</span></div>
+      <div class="text-[11px] text-slate-400 mt-1">Rejim: <span id="modeTxt" class="text-slate-200">-</span></div>
     </div>
   </div>
 
-  <!-- REJIMLAR VA KNOPKALAR -->
   <div class="glass rounded-3xl p-4 space-y-3">
-    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Ishlash Rejimi (Mode)</div>
+    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Ishlash rejimi</div>
     <div class="grid grid-cols-4 gap-2" id="modeBtns">
-      <button onclick="setMode('heating')" data-m="heating" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">🔥 Isitish</button>
-      <button onclick="setMode('cooling')" data-m="cooling" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">❄️ Sovutish</button>
-      <button onclick="setMode('dhw')" data-m="dhw" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">🚿 Issiq Suv</button>
-      <button onclick="setMode('auto')" data-m="auto" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">🤖 Avto</button>
+      <button onclick="setMode('heating')" data-m="heating" class="opt py-2.5 rounded-xl text-xs font-bold">🔥 Isitish</button>
+      <button onclick="setMode('cooling')" data-m="cooling" class="opt py-2.5 rounded-xl text-xs font-bold">❄️ Sovutish</button>
+      <button onclick="setMode('dhw')" data-m="dhw" class="opt py-2.5 rounded-xl text-xs font-bold">🚿 Suv</button>
+      <button onclick="setMode('auto')" data-m="auto" class="opt py-2.5 rounded-xl text-xs font-bold">🤖 Avto</button>
     </div>
-
-    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 pt-1">Quvvat Profili</div>
+    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 pt-1">Quvvat profili</div>
     <div class="grid grid-cols-4 gap-2" id="presetBtns">
-      <button onclick="setPreset('normal')" data-p="normal" class="py-2 rounded-xl text-xs font-bold border border-slate-800">⚖️ Normal</button>
-      <button onclick="setPreset('eco')" data-p="eco" class="py-2 rounded-xl text-xs font-bold border border-slate-800">🌿 Eco</button>
-      <button onclick="setPreset('boost')" data-p="boost" class="py-2 rounded-xl text-xs font-bold border border-slate-800">⚡ Turbo</button>
-      <button onclick="setPreset('silent')" data-p="silent" class="py-2 rounded-xl text-xs font-bold border border-slate-800">🌙 Tungi</button>
+      <button onclick="setPreset('normal')" data-p="normal" class="opt py-2 rounded-xl text-xs font-bold">⚖️ Normal</button>
+      <button onclick="setPreset('eco')" data-p="eco" class="opt py-2 rounded-xl text-xs font-bold">🌿 Eco</button>
+      <button onclick="setPreset('boost')" data-p="boost" class="opt py-2 rounded-xl text-xs font-bold">⚡ Turbo</button>
+      <button onclick="setPreset('silent')" data-p="silent" class="opt py-2 rounded-xl text-xs font-bold">🌙 Tungi</button>
     </div>
-
     <div class="grid grid-cols-3 gap-2 pt-1">
-      <button onclick="toggleExtra('weather_comp')" id="btnWeather" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">📈 EKD Krivaya</button>
-      <button onclick="toggleExtra('defrost')" id="btnDefrost" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">🧊 Defrost</button>
-      <button onclick="toggleExtra('sterilize')" id="btnLegion" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">🛡️ Anti-Legion</button>
+      <button onclick="toggleExtra('weather_comp')" id="x_weather_comp" class="opt py-2 rounded-xl text-[11px] font-bold">📈 EKD</button>
+      <button onclick="toggleExtra('defrost')" id="x_defrost" class="opt py-2 rounded-xl text-[11px] font-bold">🧊 Defrost</button>
+      <button onclick="toggleExtra('sterilize')" id="x_sterilize" class="opt py-2 rounded-xl text-[11px] font-bold">🛡️ Anti-Legion</button>
     </div>
   </div>
 
-  <!-- STATISTIKA (0 DAN BOSHLANADIGAN TOZA BAZA) -->
   <div class="glass rounded-3xl p-4 space-y-3.5">
     <div class="flex items-center justify-between">
-      <div class="font-extrabold text-sm">📊 Aniq Statistika (Progressiv Tarif)</div>
+      <div class="font-extrabold text-sm">📊 Statistika</div>
       <span class="text-[11px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-        Joriy seans: <b id="curSessMin">0</b> daq (<b id="curSessKwh">0.00</b> kWh)
+        Seans: <b id="curSessMin">0</b> daq (<b id="curSessKwh">0.00</b> kWh)
       </span>
     </div>
-
     <div class="grid grid-cols-3 gap-2 text-center">
-      <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-        <div class="text-[10px] text-slate-400 font-bold">KUNLIK (Bugun)</div>
-        <div class="text-lg font-black text-orange-400 mt-0.5"><span id="dKwh">0.0</span> <span class="text-[10px]">kWh</span></div>
-        <div class="text-[10px] text-slate-400 mt-0.5">COP: <b id="dCop">0</b></div>
-        <div class="text-[10px] text-emerald-400 font-bold mt-1" id="dUzs">0 so'm</div>
-      </div>
-      <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-        <div class="text-[10px] text-slate-400 font-bold">HAFTALIK (7 kun)</div>
-        <div class="text-lg font-black text-sky-400 mt-0.5"><span id="wKwh">0.0</span> <span class="text-[10px]">kWh</span></div>
-        <div class="text-[10px] text-slate-400 mt-0.5">COP: <b id="wCop">0</b></div>
-        <div class="text-[10px] text-emerald-400 font-bold mt-1" id="wUzs">0 so'm</div>
-      </div>
-      <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-        <div class="text-[10px] text-slate-400 font-bold">OYLIK (Norma)</div>
-        <div class="text-lg font-black text-purple-400 mt-0.5"><span id="mKwh">0.0</span> <span class="text-[10px]">kWh</span></div>
-        <div class="text-[10px] text-slate-400 mt-0.5" id="normZone">1-Zona (650)</div>
-        <div class="text-[10px] text-emerald-400 font-bold mt-1" id="mUzs">0 so'm</div>
-      </div>
+      <div class="bg-slate-900/90 p-3 rounded-2xl"><div class="text-[10px] text-slate-400 font-bold">BUGUN</div><div class="text-lg font-black text-orange-400"><span id="dKwh">0.0</span> <span class="text-[10px]">kWh</span></div><div class="text-[10px] text-emerald-400 font-bold mt-1" id="dUzs">0 so'm</div></div>
+      <div class="bg-slate-900/90 p-3 rounded-2xl"><div class="text-[10px] text-slate-400 font-bold">7 KUN</div><div class="text-lg font-black text-sky-400"><span id="wKwh">0.0</span> <span class="text-[10px]">kWh</span></div><div class="text-[10px] text-emerald-400 font-bold mt-1" id="wUzs">0 so'm</div></div>
+      <div class="bg-slate-900/90 p-3 rounded-2xl"><div class="text-[10px] text-slate-400 font-bold">OY</div><div class="text-lg font-black text-purple-400"><span id="mKwh">0.0</span> <span class="text-[10px]">kWh</span></div><div class="text-[10px] text-slate-400" id="normZone"></div><div class="text-[10px] text-emerald-400 font-bold" id="mUzs">0 so'm</div></div>
     </div>
-
+    <div class="text-[10px] text-slate-500">So'm hisobi oylik jami sarfga nisbatan progressiv tarif bo'yicha (kun/hafta — oy ichidagi ulushi). Ilova ochiq bo'lgandagina o'lchanadi.</div>
     <div>
-      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">⏱️ Oxirgi Seanslar Tarixi</div>
-      <div class="space-y-1.5 max-h-56 overflow-y-auto" id="sessionsList">
-        <div class="text-center text-xs text-slate-500 py-3">Hozircha seanslar yo'q. Nasos ishlaganda yozib boriladi.</div>
-      </div>
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">⏱️ Oxirgi seanslar</div>
+      <div class="space-y-1.5 max-h-56 overflow-y-auto" id="sessionsList"></div>
     </div>
   </div>
-
 </div>
 
-<!-- SETTINGS MODAL (TARIQLAR VA SOZLAMALAR) -->
-<div id="settingsModal" class="modal items-center justify-center p-4">
-  <div class="glass w-full max-w-md rounded-3xl p-5 space-y-4 border border-slate-700">
-    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-      <div class="font-extrabold text-base">⚙️ Tarif va Narx Sozlamalari</div>
-      <button onclick="closeSettings()" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400">✕</button>
-    </div>
+<div id="toast" class="glass rounded-xl px-4 py-2 text-xs font-bold"></div>
 
-    <div class="space-y-3 text-xs">
-      <div class="text-slate-400">Sizning oylik ijtimoiy norma tariflaringiz (so'm / kWh):</div>
-      
-      <div class="grid grid-cols-2 gap-2">
-        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-          <div class="text-slate-400 text-[10px]">0 - 200 kW</div>
-          <input type="number" id="t1" value="650" class="w-full bg-slate-800 text-white font-bold p-1.5 rounded-lg mt-1 border border-slate-700">
-        </div>
-        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-          <div class="text-slate-400 text-[10px]">200 - 500 kW</div>
-          <input type="number" id="t2" value="900" class="w-full bg-slate-800 text-white font-bold p-1.5 rounded-lg mt-1 border border-slate-700">
-        </div>
-        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-          <div class="text-slate-400 text-[10px]">500 - 1000 kW</div>
-          <input type="number" id="t3" value="1100" class="w-full bg-slate-800 text-white font-bold p-1.5 rounded-lg mt-1 border border-slate-700">
-        </div>
-        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-          <div class="text-slate-400 text-[10px]">1000+ kW</div>
-          <input type="number" id="t4" value="1500" class="w-full bg-slate-800 text-white font-bold p-1.5 rounded-lg mt-1 border border-slate-700">
-        </div>
+<div id="settingsModal" class="modal items-start justify-center p-4">
+  <div class="glass w-full max-w-md rounded-3xl p-5 space-y-4 border border-slate-700 my-4">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+      <div class="font-extrabold text-base">⚙️ Sozlamalar</div>
+      <button onclick="closeSettings()" class="w-8 h-8 rounded-full bg-slate-800 font-bold text-slate-400">✕</button>
+    </div>
+    <div class="text-xs space-y-2">
+      <div class="text-slate-400">Tuya (bir marta kiritiladi, telefonda saqlanadi):</div>
+      <input id="cId" class="inp" placeholder="Client ID">
+      <input id="cSecret" type="password" class="inp" placeholder="Client Secret">
+      <input id="cDev" class="inp" placeholder="Device ID">
+      <div class="text-slate-400 pt-2">Nasos nominal quvvati (kW) — datchik bo'lmasa taxmin uchun:</div>
+      <input id="cRated" type="number" step="0.1" class="inp">
+      <div class="text-slate-400 pt-2">Tarif (so'm/kWh): 0-200 / 200-500 / 500-1000 / 1000+</div>
+      <div class="grid grid-cols-4 gap-2">
+        <input id="t1" type="number" class="inp"><input id="t2" type="number" class="inp">
+        <input id="t3" type="number" class="inp"><input id="t4" type="number" class="inp">
       </div>
     </div>
-
-    <button onclick="saveSettings()" class="w-full py-3 rounded-xl mango-grad text-slate-950 font-extrabold text-sm shadow-lg mt-2">Saqlash</button>
+    <details class="text-[10px] text-slate-400">
+      <summary class="cursor-pointer">Qurilma DP kodlari (diagnostika)</summary>
+      <pre id="dbg" class="mt-2 whitespace-pre-wrap break-all" style="user-select:text"></pre>
+    </details>
+    <div class="flex gap-2">
+      <button onclick="resetStats()" class="px-3 py-3 rounded-xl bg-rose-900/60 border border-rose-700 text-xs font-bold">Statistikani 0 qilish</button>
+      <button onclick="saveSettings()" class="flex-1 py-3 rounded-xl mango-grad font-extrabold text-sm">Saqlash</button>
+    </div>
   </div>
 </div>
 
 <script>
-const TUYA_CONFIG = {
-  clientId: "9ypj8xuvmmn7cfa7wr3f",
-  clientSecret: "17fb81c30e4f4fc79f4bad6825a41469",
-  deviceId: "bf948d5b5403c8b1474gtz",
-  endpoints: ["https://openapi.tuyaeu.com", "https://openapi.tuyacn.com", "https://openapi.tuyaus.com"]
-};
+const $ = id => document.getElementById(id);
+const LS = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? d : v; } catch (e) { return d; } };
+const put = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
-let activeEndpoint = localStorage.getItem("tuya_endpoint") || TUYA_CONFIG.endpoints[0];
-let accessToken = "";
-let tokenExpireTime = 0;
+const ENDPOINTS = ["https://openapi.tuyaeu.com", "https://openapi.tuyaus.com", "https://openapi.tuyacn.com", "https://openapi.tuyain.com"];
+const POLL_MS = 5000;
 
-let tariffs = JSON.parse(localStorage.getItem("mango_tariffs")) || { t1: 650, t2: 900, t3: 1100, t4: 1500 };
-let sysMode = localStorage.getItem("mango_sysmode") || "radiator"; // radiator yoki fancoil
+let cfg = Object.assign({ clientId: "", clientSecret: "", deviceId: "", ratedKw: 3.0 }, LS("mango_cfg", {}));
+let tariffs = Object.assign({ t1: 650, t2: 900, t3: 1100, t4: 1500 }, LS("mango_tariffs", {}));
+let sysMode = LS("mango_sysmode", "radiator");
+let endpoint = LS("tuya_endpoint", ENDPOINTS[0]);
+let token = "", tokenExp = 0, lastErr = "", polling = false, lockUntil = 0, tempTimer = null;
 
-let state = JSON.parse(localStorage.getItem("mango_last_state")) || {
-  power: false,
-  mode: "heating",
-  preset: "normal",
-  target_temp: sysMode === "radiator" ? 50.0 : 40.0,
-  inlet_temp: 15.0,
-  outlet_temp: 15.0,
-  ambient_temp: 6.0,
-  dhw_temp: 18.0,
-  compressor_hz: 0,
-  water_flow: 0,
-  power_kw: 0.02,
-  heat_kw: 0.0,
-  cop: 0.0,
-  weather_comp: true,
-  defrost: false,
-  sterilize: false,
-  last_seen_ts: Date.now()
-};
+let st = { power: false, mode: "heating", preset: "normal", target: 45, out: null, inn: null, dhw: null, amb: null,
+           hz: 0, flow: 0, kw: 0, heat: 0, cop: 0, realKw: false, weather_comp: false, defrost: false, sterilize: false, online: false };
+let codes = {};
+let db = LS("mango_db2", { days: {}, sess: null, sessions: [], lastTs: 0 });
 
-let statsDB = JSON.parse(localStorage.getItem("mango_stats_db")) || {
-  currentSessionStart: Date.now(),
-  currentSessionKwh: 0,
-  dailyKwh: 0,
-  weeklyKwh: 0,
-  monthlyKwh: 0,
-  dayStamp: new Date().toDateString(),
-  sessions: []
-};
-
-// Tarif bo'yicha so'mni hisoblash (Progressiv shkala)
-function calculateCost(totalKwh) {
-  let cost = 0;
-  let remaining = totalKwh;
-  
-  const b1 = Math.min(remaining, 200);
-  cost += b1 * tariffs.t1;
-  remaining -= b1;
-
-  if (remaining <= 0) return { cost, zone: "1-Zona (" + tariffs.t1 + ")" };
-
-  const b2 = Math.min(remaining, 300);
-  cost += b2 * tariffs.t2;
-  remaining -= b2;
-
-  if (remaining <= 0) return { cost, zone: "2-Zona (" + tariffs.t2 + ")" };
-
-  const b3 = Math.min(remaining, 500);
-  cost += b3 * tariffs.t3;
-  remaining -= b3;
-
-  if (remaining <= 0) return { cost, zone: "3-Zona (" + tariffs.t3 + ")" };
-
-  cost += remaining * tariffs.t4;
-  return { cost, zone: "4-Zona (" + tariffs.t4 + ")" };
+// ---------- yordamchilar ----------
+function toast(msg) {
+  const t = $("toast"); t.innerText = msg; t.style.display = "block";
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = "none", 3500);
 }
+function dayKey(d) {
+  d = d || new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+const f1 = v => (v === null || v === undefined || isNaN(v)) ? "--" : Number(v).toFixed(1);
 
-function setSysMode(m) {
-  sysMode = m;
-  localStorage.setItem("mango_sysmode", m);
-  if (m === "fancoil") {
-    state.target_temp = 40.0;
-  } else {
-    state.target_temp = 50.0;
+// ---------- progressiv tarif ----------
+function tierCost(kwh) {
+  const tiers = [[200, tariffs.t1], [300, tariffs.t2], [500, tariffs.t3], [Infinity, tariffs.t4]];
+  let rem = Math.max(0, kwh), cost = 0, zone = 0;
+  for (let i = 0; i < tiers.length; i++) {
+    const take = Math.min(rem, tiers[i][0]);
+    cost += take * tiers[i][1]; rem -= take;
+    if (take > 0) zone = i;
+    if (rem <= 0) break;
   }
-  renderUI();
+  return { cost, zone };
+}
+function sums() {
+  const today = dayKey(), ym = today.slice(0, 7);
+  const d = db.days[today] || 0;
+  let w = 0, m = 0;
+  for (let i = 0; i < 7; i++) w += db.days[dayKey(new Date(Date.now() - i * 864e5))] || 0;
+  for (const k in db.days) if (k.startsWith(ym)) m += db.days[k];
+  return { d, w, m };
 }
 
-function openSettings() {
-  document.getElementById("t1").value = tariffs.t1;
-  document.getElementById("t2").value = tariffs.t2;
-  document.getElementById("t3").value = tariffs.t3;
-  document.getElementById("t4").value = tariffs.t4;
-  document.getElementById("settingsModal").classList.add("active");
-}
-
-function closeSettings() {
-  document.getElementById("settingsModal").classList.remove("active");
-}
-
-function saveSettings() {
-  tariffs.t1 = Number(document.getElementById("t1").value);
-  tariffs.t2 = Number(document.getElementById("t2").value);
-  tariffs.t3 = Number(document.getElementById("t3").value);
-  tariffs.t4 = Number(document.getElementById("t4").value);
-  localStorage.setItem("mango_tariffs", JSON.stringify(tariffs));
-  closeSettings();
-  renderUI();
-}
-
-// TUYA API REQUEST
-function signTuyaRequest(method, path, bodyStr = "", token = "") {
+// ---------- Tuya API ----------
+function headers(method, path, body, tok) {
   const t = Date.now().toString();
-  const contentHash = CryptoJS.SHA256(bodyStr).toString(CryptoJS.enc.Hex);
-  const stringToSign = [method, contentHash, "", path].join("\n");
-  const signStr = TUYA_CONFIG.clientId + token + t + stringToSign;
-  const sign = CryptoJS.HmacSHA256(signStr, TUYA_CONFIG.clientSecret).toString(CryptoJS.enc.Hex).toUpperCase();
-  
-  const headers = { "client_id": TUYA_CONFIG.clientId, "sign": sign, "t": t, "sign_method": "HMAC-SHA256", "Content-Type": "application/json" };
-  if (token) headers["access_token"] = token;
-  return headers;
+  const hash = CryptoJS.SHA256(body).toString(CryptoJS.enc.Hex);
+  const strToSign = [method, hash, "", path].join("\n");
+  const sign = CryptoJS.HmacSHA256(cfg.clientId + tok + t + strToSign, cfg.clientSecret).toString(CryptoJS.enc.Hex).toUpperCase();
+  const h = { client_id: cfg.clientId, sign: sign, t: t, sign_method: "HMAC-SHA256", "Content-Type": "application/json" };
+  if (tok) h.access_token = tok;
+  return h;
+}
+async function getToken() {
+  const path = "/v1.0/token?grant_type=1";
+  const list = [endpoint].concat(ENDPOINTS.filter(e => e !== endpoint));
+  for (const ep of list) {
+    try {
+      const r = await fetch(ep + path, { method: "GET", headers: headers("GET", path, "", "") });
+      const d = await r.json();
+      if (d && d.success) {
+        token = d.result.access_token;
+        tokenExp = Date.now() + (d.result.expire_time - 60) * 1000;
+        if (ep !== endpoint) { endpoint = ep; put("tuya_endpoint", ep); }
+        return true;
+      }
+      lastErr = (d && (d.msg || d.code)) || "token xatosi";
+    } catch (e) { lastErr = e.message || "tarmoq xatosi"; }
+  }
+  return false;
+}
+async function tuya(method, path, bodyObj) {
+  const body = bodyObj ? JSON.stringify(bodyObj) : "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (!token || Date.now() >= tokenExp) { if (!(await getToken())) return null; }
+    const r = await fetch(endpoint + path, { method: method, headers: headers(method, path, body, token), body: bodyObj ? body : undefined });
+    const d = await r.json();
+    if (d && !d.success && (d.code === 1010 || d.code === 1011)) { token = ""; continue; }
+    return d;
+  }
+  return null;
 }
 
-async function tuyaFetch(method, path, bodyObj = null) {
-  const bodyStr = bodyObj ? JSON.stringify(bodyObj) : "";
-  if (!accessToken || Date.now() >= tokenExpireTime) {
-    const p = "/v1.0/token?grant_type=1";
-    for (const ep of TUYA_CONFIG.endpoints) {
-      try {
-        const r = await fetch(ep + p, { method: "GET", headers: signTuyaRequest("GET", p, "", "") });
-        const data = await r.json();
-        if (data && data.success && data.result) {
-          accessToken = data.result.access_token;
-          tokenExpireTime = Date.now() + (data.result.expire_time - 60) * 1000;
-          break;
-        }
-      } catch(e){}
-    }
-  }
-  const headers = signTuyaRequest(method, path, bodyStr, accessToken);
-  const res = await fetch(activeEndpoint + path, { method, headers, body: bodyObj ? bodyStr : undefined });
-  return await res.json();
+// ---------- DP kodlarini aniqlash ----------
+const ROLES = [
+  ["power", /^(switch|power|switch_1|on_off)$/],
+  ["target", /temp_?set|set_?temp|target/],
+  ["amb", /amb|outdoor|environ|air_?temp/],
+  ["dhw", /dhw|tank|hot_?water|buffer/],
+  ["out", /out|supply|leav/],
+  ["inn", /(^|_)in(_|$)|inlet|return/],
+  ["hz", /freq|hz|compress/],
+  ["flow", /flow/],
+  ["kw", /cur_power|active_power|power_?(w|kw)|elec.*power/],
+  ["weather_comp", /weather|curve/],
+  ["defrost", /defrost/],
+  ["sterilize", /sterili|legion/],
+  ["mode", /^mode$|work_?mode/],
+  ["preset", /preset|scene|level|eco|silent/]
+];
+function mapStatus(items) {
+  const claimed = new Set(), res = {};
+  ROLES.forEach(([role, re]) => {
+    const it = items.find(i => !claimed.has(i.code) && re.test(i.code.toLowerCase()));
+    if (it) { claimed.add(it.code); res[role] = it; }
+  });
+  return res;
 }
+function tempVal(role, v) {
+  v = Number(v);
+  const scale = Math.abs(v) > 150 ? 10 : 1;
+  codes[role] = Object.assign(codes[role] || {}, { scale: scale });
+  return v / scale;
+}
+const modeKey = v => { v = String(v).toLowerCase(); return /cool/.test(v) ? "cooling" : /dhw|hot|water/.test(v) ? "dhw" : /auto/.test(v) ? "auto" : "heating"; };
+const presetKey = v => { v = String(v).toLowerCase(); return /eco/.test(v) ? "eco" : /boost|turbo|power/.test(v) ? "boost" : /silent|night/.test(v) ? "silent" : "normal"; };
 
-async function pollTuyaDevice() {
-  document.getElementById("lastUpd").innerText = new Date().toTimeString().split(" ")[0];
-  try {
-    const res = await tuyaFetch("GET", `/v1.0/iot-03/devices/${TUYA_CONFIG.deviceId}/status`);
-    if (res && res.success && Array.isArray(res.result)) {
-      document.getElementById("connDot").className = "w-2 h-2 rounded-full bg-emerald-400 pulse-dot";
-      res.result.forEach(item => {
-        const k = item.code.toLowerCase();
-        const v = item.value;
-        if (k === "switch" || k === "power") state.power = Boolean(v);
-        else if (k.includes("temp_set")) state.target_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
-        else if (k.includes("out") || k.includes("supply")) state.outlet_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
-        else if (k.includes("in")) state.inlet_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
-        else if (k.includes("amb")) state.ambient_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
-        else if (k.includes("dhw")) state.dhw_temp = Number(v) > 100 ? Number(v)/10 : Number(v);
-        else if (k.includes("freq")) state.compressor_hz = Number(v);
-      });
-    }
-  } catch (e) {
-    document.getElementById("connDot").className = "w-2 h-2 rounded-full bg-amber-400 pulse-dot";
+function applyStatus(items) {
+  const m = mapStatus(items);
+  codes = {};
+  for (const r in m) codes[r] = { code: m[r].code, scale: 1 };
+  const locked = Date.now() < lockUntil;
+  if (m.power && !locked) st.power = Boolean(m.power.value);
+  if (m.target && !locked) st.target = tempVal("target", m.target.value);
+  if (m.out) st.out = tempVal("out", m.out.value);
+  if (m.inn) st.inn = tempVal("inn", m.inn.value);
+  if (m.dhw) st.dhw = tempVal("dhw", m.dhw.value);
+  if (m.amb) st.amb = tempVal("amb", m.amb.value);
+  if (m.hz) st.hz = Number(m.hz.value) || 0;
+  if (m.flow) { const f = Number(m.flow.value); st.flow = f > 500 ? f / 10 : f; }
+  if (!locked) {
+    if (m.mode) st.mode = modeKey(m.mode.value);
+    if (m.preset) st.preset = presetKey(m.preset.value);
+    ["weather_comp", "defrost", "sterilize"].forEach(k => { if (m[k]) st[k] = Boolean(m[k].value); });
   }
-
-  // Agar 2 kundan beri o'chiq bo'lsa datchiklarni ko'cha haroratiga tenglash
-  if (!state.power) {
-    state.outlet_temp = state.ambient_temp;
-    state.inlet_temp = state.ambient_temp;
-    state.compressor_hz = 0;
-    state.power_kw = 0.02;
-    state.heat_kw = 0.0;
-    state.cop = 0.0;
-    state.water_flow = 0.0;
+  // elektr quvvati: haqiqiy datchik yoki taxmin
+  if (m.kw) {
+    const v = Number(m.kw.value);
+    st.kw = v >= 50 ? v / 1000 : v; st.realKw = true;
   } else {
-    state.compressor_hz = 48;
-    state.power_kw = 2.85;
-    state.heat_kw = 14.14;
-    state.cop = 4.96;
-    state.water_flow = 28.1;
+    st.realKw = false;
+    st.kw = st.power ? Math.max(0.05, cfg.ratedKw * Math.min(1, st.hz / 100)) : 0.02;
   }
+  // issiqlik va COP: Q = dT * oqim(L/min) * 4.186 / 60
+  st.heat = (st.power && st.out !== null && st.inn !== null && st.flow > 0) ? Math.max(0, (st.out - st.inn) * st.flow * 0.0697) : 0;
+  st.cop = (st.kw > 0.2 && st.heat > 0) ? st.heat / st.kw : 0;
+  $("dbg").innerText = items.map(i => i.code + " = " + JSON.stringify(i.value)).join("\n");
+}
 
+async function sendCmd(role, value) {
+  const c = codes[role];
+  if (!c) { toast("Bu funksiya uchun DP kodi topilmadi (Sozlamalar > diagnostika)"); return false; }
+  const d = await tuya("POST", "/v1.0/iot-03/devices/" + cfg.deviceId + "/commands", { commands: [{ code: c.code, value: value }] });
+  if (d && d.success) return true;
+  toast("Buyruq bajarilmadi: " + ((d && (d.msg || d.code)) || "tarmoq xatosi"));
+  lockUntil = 0;
+  return false;
+}
+
+// ---------- statistika yig'ish ----------
+function accumulate() {
+  const now = Date.now();
+  if (db.lastTs && st.online) {
+    const dt = Math.min((now - db.lastTs) / 3600000, 30 / 3600);
+    const kwh = st.kw * dt, k = dayKey();
+    db.days[k] = (db.days[k] || 0) + kwh;
+    if (db.sess) db.sess.kwh += kwh;
+  }
+  db.lastTs = now;
+  if (st.power && !db.sess) db.sess = { start: now, kwh: 0 };
+  if (!st.power && db.sess) {
+    const mins = Math.round((now - db.sess.start) / 60000);
+    if (mins >= 1 || db.sess.kwh > 0.01) db.sessions.unshift({ start: db.sess.start, mins: mins, kwh: db.sess.kwh });
+    db.sessions = db.sessions.slice(0, 30);
+    db.sess = null;
+  }
+  const keep = dayKey(new Date(now - 62 * 864e5));
+  for (const k in db.days) if (k < keep) delete db.days[k];
+  put("mango_db2", db);
+}
+
+// ---------- polling ----------
+async function poll() {
+  if (polling || document.hidden) return;
+  if (!cfg.clientId || !cfg.clientSecret || !cfg.deviceId) {
+    $("connText").innerText = "Tuya sozlanmagan (⚙️)"; return;
+  }
+  polling = true;
+  try {
+    const res = await tuya("GET", "/v1.0/iot-03/devices/" + cfg.deviceId + "/status");
+    if (res && res.success && Array.isArray(res.result)) {
+      st.online = true; applyStatus(res.result);
+      $("lastUpd").innerText = new Date().toTimeString().split(" ")[0];
+    } else {
+      st.online = false; lastErr = (res && (res.msg || res.code)) || lastErr;
+    }
+  } catch (e) { st.online = false; lastErr = e.message; }
+  polling = false;
+  accumulate();
   renderUI();
 }
 
-function renderUI() {
-  const pBtn = document.getElementById("pwrBtn");
-  pBtn.innerText = state.power ? "ON • ISHLAMOQDA" : "OFF • O'CHIQ";
-  pBtn.className = state.power 
-    ? "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30" 
-    : "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-rose-600 text-white shadow-lg";
-
-  document.getElementById("targetTemp").innerText = state.target_temp.toFixed(1);
-  document.getElementById("outTemp").innerText = state.outlet_temp.toFixed(1);
-  document.getElementById("inTemp").innerText = state.inlet_temp.toFixed(1);
-  document.getElementById("dhwTemp").innerText = state.dhw_temp.toFixed(1);
-  document.getElementById("ambTemp").innerText = state.ambient_temp.toFixed(1);
-
-  document.getElementById("pwrKw").innerText = state.power_kw.toFixed(2);
-  document.getElementById("heatKw").innerText = state.heat_kw.toFixed(2);
-  document.getElementById("copVal").innerText = state.cop.toFixed(2);
-  document.getElementById("compHz").innerText = state.compressor_hz;
-  document.getElementById("wFlow").innerText = state.water_flow.toFixed(1);
-
-  // Fankoil / Radiator tugmalari rangi
-  document.getElementById("btnRad").className = sysMode === "radiator" 
-    ? "px-3 py-1.5 rounded-lg text-xs font-bold mango-grad text-slate-950 shadow" 
-    : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400";
-  document.getElementById("btnFan").className = sysMode === "fancoil" 
-    ? "px-3 py-1.5 rounded-lg text-xs font-bold mango-grad text-slate-950 shadow" 
-    : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400";
-  document.getElementById("sysModeDesc").innerText = sysMode === "radiator" ? "Radiator rejimi (Maqsad: 50-60°C)" : "Fankoil rejimi (Maqsad: 35-45°C)";
-
-  // Statistika
-  document.getElementById("dKwh").innerText = statsDB.dailyKwh.toFixed(1);
-  document.getElementById("dCop").innerText = "4.96";
-  const dRes = calculateCost(statsDB.dailyKwh);
-  document.getElementById("dUzs").innerText = Math.round(dRes.cost).toLocaleString() + " so'm";
-
-  document.getElementById("wKwh").innerText = statsDB.weeklyKwh.toFixed(1);
-  const wRes = calculateCost(statsDB.weeklyKwh);
-  document.getElementById("wUzs").innerText = Math.round(wRes.cost).toLocaleString() + " so'm";
-
-  document.getElementById("mKwh").innerText = statsDB.monthlyKwh.toFixed(1);
-  const mRes = calculateCost(statsDB.monthlyKwh);
-  document.getElementById("mUzs").innerText = Math.round(mRes.cost).toLocaleString() + " so'm";
-  document.getElementById("normZone").innerText = mRes.zone;
+// ---------- boshqaruv ----------
+async function togglePower() {
+  st.power = !st.power; lockUntil = Date.now() + 8000; renderUI();
+  await sendCmd("power", st.power);
 }
-
-function togglePower() {
-  state.power = !state.power;
-  renderUI();
-}
-
 function changeTemp(d) {
-  state.target_temp = Math.max(15, Math.min(65, state.target_temp + d));
-  renderUI();
+  const [lo, hi] = sysMode === "radiator" ? [30, 65] : [20, 55];
+  st.target = Math.max(lo, Math.min(hi, st.target + d));
+  lockUntil = Date.now() + 8000; renderUI();
+  clearTimeout(tempTimer);
+  tempTimer = setTimeout(() => {
+    const sc = (codes.target && codes.target.scale) || 1;
+    sendCmd("target", Math.round(st.target * sc));
+  }, 800);
+}
+async function setMode(m) { st.mode = m; lockUntil = Date.now() + 8000; renderUI(); await sendCmd("mode", m); }
+async function setPreset(p) { st.preset = p; lockUntil = Date.now() + 8000; renderUI(); await sendCmd("preset", p); }
+async function toggleExtra(k) { st[k] = !st[k]; lockUntil = Date.now() + 8000; renderUI(); await sendCmd(k, st[k]); }
+function setSysMode(m) { sysMode = m; put("mango_sysmode", m); renderUI(); }
+
+// ---------- sozlamalar ----------
+function openSettings() {
+  $("cId").value = cfg.clientId; $("cSecret").value = cfg.clientSecret; $("cDev").value = cfg.deviceId; $("cRated").value = cfg.ratedKw;
+  ["t1", "t2", "t3", "t4"].forEach(k => $(k).value = tariffs[k]);
+  $("settingsModal").classList.add("active");
+}
+function closeSettings() { $("settingsModal").classList.remove("active"); }
+function saveSettings() {
+  cfg = { clientId: $("cId").value.trim(), clientSecret: $("cSecret").value.trim(), deviceId: $("cDev").value.trim(), ratedKw: Number($("cRated").value) || 3 };
+  ["t1", "t2", "t3", "t4"].forEach(k => tariffs[k] = Number($(k).value) || 0);
+  put("mango_cfg", cfg); put("mango_tariffs", tariffs);
+  token = ""; closeSettings(); poll(); renderUI();
+}
+function resetStats() {
+  if (!confirm("Barcha statistika o'chiriladi. Davom etasizmi?")) return;
+  db = { days: {}, sess: null, sessions: [], lastTs: 0 }; put("mango_db2", db); renderUI();
 }
 
-function setMode(m) { state.mode = m; renderUI(); }
-function setPreset(p) { state.preset = p; renderUI(); }
-function toggleExtra(k) { state[k] = !state[k]; renderUI(); }
+// ---------- UI ----------
+function renderUI() {
+  const pb = $("pwrBtn");
+  pb.innerText = st.power ? "ON • ISHLAMOQDA" : "OFF • O'CHIQ";
+  pb.className = "px-4 py-2.5 rounded-xl font-extrabold text-xs active:scale-95 " + (st.power ? "bg-emerald-500 text-slate-950" : "bg-rose-600 text-white");
+  $("connDot").className = "w-2 h-2 rounded-full " + (st.online ? "bg-emerald-400 pulse-dot" : "bg-amber-400");
+  if (cfg.clientId) $("connText").innerText = st.online ? "Tuya • " : ("Aloqa yo'q" + (lastErr ? " (" + lastErr + ")" : "") + " • ");
+
+  $("targetTemp").innerText = f1(st.target);
+  $("outTemp").innerText = f1(st.out); $("inTemp").innerText = f1(st.inn);
+  $("dhwTemp").innerText = f1(st.dhw); $("ambTemp").innerText = f1(st.amb);
+  $("pwrKw").innerText = st.kw.toFixed(2); $("heatKw").innerText = st.heat.toFixed(2);
+  $("copVal").innerText = st.cop.toFixed(2); $("compHz").innerText = st.hz; $("wFlow").innerText = f1(st.flow);
+  $("estTag").innerText = st.realKw ? "" : "(taxminiy)";
+  $("modeTxt").innerText = st.mode;
+
+  const rad = sysMode === "radiator";
+  $("btnRad").className = "px-3 py-1.5 rounded-lg text-xs font-bold " + (rad ? "mango-grad" : "text-slate-400");
+  $("btnFan").className = "px-3 py-1.5 rounded-lg text-xs font-bold " + (!rad ? "mango-grad" : "text-slate-400");
+  $("sysModeDesc").innerText = rad ? "Radiator: tavsiya 50-60°C (diapazon 30-65)" : "Fankoil: tavsiya 35-45°C (diapazon 20-55)";
+
+  document.querySelectorAll("#modeBtns button").forEach(b => b.classList.toggle("on", b.dataset.m === st.mode));
+  document.querySelectorAll("#presetBtns button").forEach(b => b.classList.toggle("on", b.dataset.p === st.preset));
+  ["weather_comp", "defrost", "sterilize"].forEach(k => $("x_" + k).classList.toggle("on", !!st[k]));
+
+  const s = sums(), mc = tierCost(s.m);
+  const dCost = mc.cost - tierCost(Math.max(0, s.m - s.d)).cost;
+  const wCost = mc.cost - tierCost(Math.max(0, s.m - s.w)).cost;
+  const so = v => Math.round(v).toLocaleString("ru-RU") + " so'm";
+  $("dKwh").innerText = s.d.toFixed(1); $("dUzs").innerText = so(dCost);
+  $("wKwh").innerText = s.w.toFixed(1); $("wUzs").innerText = so(wCost);
+  $("mKwh").innerText = s.m.toFixed(1); $("mUzs").innerText = so(mc.cost);
+  $("normZone").innerText = (mc.zone + 1) + "-zona";
+
+  const cs = db.sess;
+  $("curSessMin").innerText = cs ? Math.round((Date.now() - cs.start) / 60000) : 0;
+  $("curSessKwh").innerText = (cs ? cs.kwh : 0).toFixed(2);
+  $("sessionsList").innerHTML = db.sessions.length ? db.sessions.slice(0, 15).map(x => {
+    const d = new Date(x.start);
+    return '<div class="flex justify-between bg-slate-900/80 rounded-xl px-3 py-2 text-xs"><span class="text-slate-300">' +
+      d.toLocaleDateString("ru-RU") + " " + d.toTimeString().slice(0, 5) + '</span><span class="text-slate-400">' + x.mins +
+      ' daq</span><b class="text-orange-400">' + x.kwh.toFixed(2) + ' kWh</b></div>';
+  }).join("") : '<div class="text-center text-xs text-slate-500 py-3">Hozircha seanslar yo\'q.</div>';
+}
 
 renderUI();
-setInterval(pollTuyaDevice, 1000);
+poll();
+setInterval(poll, POLL_MS);
+setInterval(renderUI, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+if (!cfg.clientId) setTimeout(openSettings, 400);
 </script>
 </body>
 </html>
