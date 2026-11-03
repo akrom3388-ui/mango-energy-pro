@@ -1,0 +1,9 @@
+{
+  "appId": "uz.akrom.mangopro",
+  "appName": "Mango Energy Pro",
+  "webDir": "www",
+  "plugins": {
+    "CapacitorHttp": { "enabled": true },
+    "LocalNotifications": { "smallIcon": "ic_launcher", "iconColor": "#FF7B00" }
+  }
+}

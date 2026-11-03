@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mango Energy Pro</title>
+<style>
+:root{--bg:#060911;--card:#0f172a;--bd:#1e293b;--m:#ff7b00;--m2:#ffae00;--g:#10b981;--r:#f43f5e;--b:#38bdf8;--t:#f8fafc;--mu:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--t);font-family:-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 0 80px}
+input,select,button{font-family:inherit;outline:none;border:none}
+.wrap{max-width:520px;margin:0 auto;padding:12px}
+.card,.tile{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px;margin-bottom:10px}
+.tile{padding:10px 12px;border-radius:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.btn{background:#1e293b;color:var(--t);border:1px solid #334155;border-radius:11px;padding:9px 12px;font-weight:700;font-size:12px;cursor:pointer}
+.btn.on{background:linear-gradient(135deg,var(--m),var(--m2));color:#050811;border-color:transparent}
+.btn.sq{width:42px;height:42px;font-size:20px}
+.btn.big{width:100%;padding:13px;font-size:13px}
+.btn:active{transform:scale(.96)}
+.inp{width:100%;background:#090d16;border:1px solid #334155;color:#fff;padding:10px;border-radius:11px;font-size:13px;margin-top:4px}
+.lbl{font-size:11px;color:var(--mu);font-weight:700;display:block;margin-top:8px}
+.k{font-size:11px;color:var(--mu);font-weight:700}
+.v{font-size:18px;font-weight:900;margin-top:2px}
+.hint{font-size:11px;color:var(--mu);margin:6px 0}
+.msg{font-size:12px;color:var(--m2);margin:8px 0;min-height:16px;word-break:break-word}
+.top{position:sticky;top:0;z-index:30;background:rgba(15,23,42,.95);border-bottom:1px solid var(--bd);padding:10px 12px}
+.badge{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:800;background:rgba(255,123,0,.18);color:var(--m2)}
+.page{display:none}.page.on{display:block}
+.nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:rgba(15,23,42,.97);border-top:1px solid var(--bd);display:grid;grid-template-columns:repeat(4,1fr);padding:6px}
+.nav button{background:none;color:var(--mu);font-size:11px;font-weight:700;padding:6px;border-radius:10px;display:flex;flex-direction:column;align-items:center}
+.nav button.on{color:var(--m);background:rgba(255,123,0,.12)}
+.ov{position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto;padding:18px 12px 40px;display:none}.ov.show{display:block}
+.hero{font-size:44px;font-weight:900;color:var(--m2);line-height:1.1}
+#err{background:rgba(244,63,94,.15);color:#fda4af;font-size:11px;padding:8px 12px;border-radius:10px;margin-bottom:10px;display:none;word-break:break-word}
+</style>
+</head>
+<body>
+
+<!-- KIRISH -->
+<div id="login" class="ov"><div class="wrap">
+  <h1 style="text-align:center;font-size:22px;margin:8px 0 14px">MANGO ENERGY PRO</h1>
+  <div class="g2" style="margin-bottom:12px">
+    <button id="tw1" class="btn on" onclick="way(1)">&#128273; Access ID / Key</button>
+    <button id="tw2" class="btn" onclick="way(2)">&#128100; Tuya Login</button>
+  </div>
+
+  <div id="w1" class="card">
+    <b style="color:var(--m2)">1-usul: Access ID + Secret + Device ID</b>
+    <label class="lbl">Nomi</label><input id="nm1" class="inp" placeholder="Mango 24kW">
+    <label class="lbl">Server regioni</label>
+    <select id="rg1" class="inp">
+      <option value="https://openapi.tuyaeu.com">Yevropa (EU)</option>
+      <option value="https://openapi.tuyaus.com">Amerika (US)</option>
+      <option value="https://openapi.tuyacn.com">Xitoy (CN)</option>
+      <option value="https://openapi.tuyain.com">Hindiston (IN)</option>
+    </select>
+    <label class="lbl">Access ID / Client ID</label><input id="cid1" class="inp" autocapitalize="off">
+    <label class="lbl">Access Secret</label><input id="sec1" class="inp" type="password" autocapitalize="off">
+    <label class="lbl">Device ID</label><input id="did1" class="inp" autocapitalize="off">
+    <button class="btn on big" style="margin-top:12px" onclick="addKey()">ULANISH</button>
+  </div>
+
+  <div id="w2" class="card" style="display:none">
+    <b style="color:var(--b)">2-usul: Tuya / Smart Life login + parol</b>
+    <p class="hint">Eslatma: Tuya login/parol bilan kirish ham Tuya IoT loyihangizning Access ID/Secret'ini talab qiladi va ilova akkaunti loyihaga ulangan bo'lishi kerak (Cloud project &rarr; Devices &rarr; Link App Account). Parol saqlanmaydi.</p>
+    <label class="lbl">Server regioni</label>
+    <select id="rg2" class="inp">
+      <option value="https://openapi.tuyaeu.com">Yevropa (EU)</option>
+      <option value="https://openapi.tuyaus.com">Amerika (US)</option>
+      <option value="https://openapi.tuyacn.com">Xitoy (CN)</option>
+      <option value="https://openapi.tuyain.com">Hindiston (IN)</option>
+    </select>
+    <label class="lbl">Access ID</label><input id="cid2" class="inp" autocapitalize="off">
+    <label class="lbl">Access Secret</label><input id="sec2" class="inp" type="password" autocapitalize="off">
+    <div class="g2">
+      <div><label class="lbl">Mamlakat kodi</label><input id="cc" class="inp" value="998"></div>
+      <div><label class="lbl">Ilova</label><select id="sch" class="inp"><option value="smartlife">Smart Life</option><option value="tuyaSmart">Tuya Smart</option></select></div>
+    </div>
+    <label class="lbl">Login (email / telefon)</label><input id="usr" class="inp" autocapitalize="off">
+    <label class="lbl">Parol</label><input id="pas" class="inp" type="password">
+    <button class="btn on big" style="margin-top:12px" onclick="loginProfile()">KIRISH</button>
+    <div id="found" style="margin-top:10px"></div>
+  </div>
+
+  <div id="loginMsg" class="msg"></div>
+  <button id="closeLogin" class="btn big" onclick="hideLogin()">Orqaga</button>
+</div></div>
+
+<!-- YUQORI PANEL -->
+<div class="top row">
+  <div style="min-width:0">
+    <select id="devSel" onchange="selectDev(+this.value)" style="background:#090d16;color:#fff;font-weight:800;font-size:13px;padding:4px 8px;border-radius:8px;border:1px solid #334155;max-width:200px"></select>
+    <div style="font-size:10px;color:var(--mu);margin-top:3px"><span id="dot">&#9679;</span> <span id="upd">--:--:--</span></div>
+  </div>
+  <button id="pwr" class="btn" onclick="togglePwr()" style="display:none">--</button>
+</div>
+
+<div class="wrap">
+  <div id="err"></div>
+
+  <div id="p-home" class="page on">
+    <div class="card">
+      <div class="row">
+        <div><div class="k" id="heroK">Harorat</div><div class="hero" id="heroV">--</div></div>
+        <div style="text-align:right"><div class="k">Quvvat</div><div class="v" id="heroP">--</div></div>
+      </div>
+    </div>
+    <div class="k" style="margin:4px 2px 6px">BOSHQARUV</div><div id="ctrl"></div>
+    <div class="k" style="margin:4px 2px 6px">DATCHIKLAR</div><div id="sens"></div>
+  </div>
+
+  <div id="p-stats" class="page">
+    <div class="card">
+      <div class="row"><b>Schyotchik (taxminiy)</b><span class="badge" id="zone">--</span></div>
+      <div class="v" id="meter" style="color:var(--g)">--</div>
+      <p class="hint" id="pNote"></p>
+      <div class="g2" style="margin-top:8px">
+        <div class="tile"><div class="k">BUGUN</div><div class="v" id="dK">0</div><div class="k" id="dS"></div><div class="k" id="dC"></div></div>
+        <div class="tile"><div class="k">HAFTA</div><div class="v" id="wK">0</div><div class="k" id="wC"></div></div>
+      </div>
+      <div class="tile"><div class="k">OY</div><div class="v" id="mK">0</div><div class="k" id="mC"></div></div>
+      <button class="btn big" style="color:var(--r)" onclick="resetStats()">Statistikani 0 qilish</button>
+    </div>
+  </div>
+
+  <div id="p-dev" class="page">
+    <div class="card">
+      <div class="row"><b>Ulangan qurilmalar</b></div>
+      <div id="devList" style="margin-top:8px"></div>
+      <div class="g2">
+        <button class="btn" onclick="showLogin(1)">&#128273; Access ID</button>
+        <button class="btn" onclick="showLogin(2)">&#128100; Tuya Login</button>
+      </div>
+    </div>
+    <div class="card"><div class="k">Tuya'dan kelayotgan xom ma'lumot</div>
+      <div id="raw" style="font-family:monospace;font-size:10px;color:var(--mu);word-break:break-all;margin-top:6px">--</div></div>
+  </div>
+
+  <div id="p-set" class="page">
+    <div class="card">
+      <b>Bildirishnoma</b>
+      <div class="row" style="margin-top:8px"><span style="font-size:12px">Doimiy panel (harorat, kW)</span><input type="checkbox" id="cfgLive"></div>
+      <div class="g2">
+        <div><label class="lbl">Past harorat ogohlantirish</label><input id="cfgMin" type="number" class="inp"></div>
+        <div><label class="lbl">Yuqori harorat ogohlantirish</label><input id="cfgMax" type="number" class="inp"></div>
+      </div>
+      <label class="lbl">Asosiy harorat kodi</label><select id="cfgT" class="inp"></select>
+    </div>
+    <div class="card">
+      <b>Quvvat o'lchash</b>
+      <div class="g2">
+        <div><label class="lbl">Quvvat kodi</label><select id="cfgP" class="inp"></select></div>
+        <div><label class="lbl">Birligi</label><select id="cfgU" class="inp"><option>W</option><option>kW</option></select></div>
+      </div>
+      <p class="hint">Nasos quvvat (W) ma'lumotini bermasa, statistika hisoblanmaydi.</p>
+    </div>
+    <div class="card">
+      <b>Pog'onali tarif (yuqori chegara kWh / narx so'm)</b>
+      <label class="lbl">Oy boshidagi schyotchik (kWh)</label><input id="cfgBase" type="number" step="0.01" class="inp">
+      <div id="tiers"></div>
+      <div class="row" style="margin-top:10px"><span style="font-size:12px">Quyosh soatlarida tekin hisoblash</span><input type="checkbox" id="cfgSolar"></div>
+      <div class="g2">
+        <div><label class="lbl">Boshlanish soati</label><input id="cfgS0" type="number" class="inp"></div>
+        <div><label class="lbl">Tugash soati</label><input id="cfgS1" type="number" class="inp"></div>
+      </div>
+    </div>
+    <button class="btn on big" onclick="saveSettings()">SAQLASH</button>
+  </div>
+</div>
+
+<div class="nav">
+  <button id="n-home" class="on" onclick="openPage('home')"><span style="font-size:18px">&#128293;</span>Boshqaruv</button>
+  <button id="n-stats" onclick="openPage('stats')"><span style="font-size:18px">&#128202;</span>Statistika</button>
+  <button id="n-dev" onclick="openPage('dev')"><span style="font-size:18px">&#128273;</span>Qurilmalar</button>
+  <button id="n-set" onclick="openPage('set')"><span style="font-size:18px">&#9881;</span>Sozlamalar</button>
+</div>
+
+<script src="spark-md5.min.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const SV=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const enc=new TextEncoder();
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+const sha=async s=>hex(await crypto.subtle.digest('SHA-256',enc.encode(s)));
+const hmac=async(k,m)=>{const key=await crypto.subtle.importKey('raw',enc.encode(k),{name:'HMAC',hash:'SHA-256'},false,['sign']);return hex(await crypto.subtle.sign('HMAC',key,enc.encode(m))).toUpperCase()};
+
+// ---------- holat ----------
+let devices=LS('mp5_dev',[]),act=LS('mp5_act',0);
+const DEF={tiers:[[200,650],[500,900],[1000,1100],[5000,1500],[10000,1750],[1e9,2000]],base:0,solar:false,s0:8,s1:17,live:true,min:5,max:62,pCode:'',pUnit:'W',tCode:''};
+let cfg=Object.assign({},DEF,LS('mp5_cfg',{}));
+let S=Object.assign({dk:'',mk:'',wk:'',d:0,ds:0,w:0,m:0},LS('mp5_stat',{}));
+let st={},err='',tok={},specCache={},lastT=Date.now(),busy=false,found=[];
+if(act>=devices.length)act=0;
+const dev=()=>devices[act];
+
+// ---------- Tuya API ----------
+async function raw(d,method,path,bs,token){
+  const ts=Date.now().toString();
+  const sts=[method,await sha(bs),'',path].join('\n');
+  const sign=await hmac(d.sec,d.cid+token+ts+sts);
+  const h={client_id:d.cid,sign:sign,t:ts,sign_method:'HMAC-SHA256','Content-Type':'application/json'};
+  if(token)h.access_token=token;
+  const r=await fetch(d.endpoint+path,{method:method,headers:h,body:bs||undefined});
+  return r.json();
+}
+async function api(d,method,path,body){
+  const key=d.endpoint+'|'+d.cid;
+  let t=tok[key];
+  if(!t||Date.now()>t.exp){
+    const j=await raw(d,'GET','/v1.0/token?grant_type=1','','');
+    if(!j.success)throw new Error('Token: '+j.msg+' ('+j.code+')');
+    t=tok[key]={v:j.result.access_token,exp:Date.now()+(j.result.expire_time-120)*1000};
+  }
+  return raw(d,method,path,body?JSON.stringify(body):'',t.v);
+}
+function parseSpec(r){
+  const o={fn:{},all:{}};
+  ['functions','status'].forEach(k=>(r[k]||[]).forEach(x=>{
+    let v={};try{v=JSON.parse(x.values||'{}')}catch(e){}
+    const e={code:x.code,type:x.type,v:v};o.all[x.code]=e;if(k==='functions')o.fn[x.code]=e;
+  }));
+  return o;
+}
+const SP=()=>specCache[(dev()||{}).id]||{fn:{},all:{}};
+const sp=c=>SP().all[c]||{type:'',v:{}};
+const scl=c=>Math.pow(10,sp(c).v.scale||0);
+function fmt(c,v){
+  if(typeof v==='boolean')return v?'ON':'OFF';
+  if(typeof v==='number'){const s=sp(c).v.scale||0;return (v/scl(c)).toFixed(s)+(sp(c).v.unit?' '+sp(c).v.unit:'')}
+  return String(v);
+}
+const num=c=>st[c]/scl(c);
+
+// ---------- so'rov (polling) ----------
+async function poll(){
+  const d=dev();if(!d||busy)return;busy=true;
+  try{
+    if(!specCache[d.id]){
+      const s=await api(d,'GET','/v1.0/devices/'+d.id+'/specifications');
+      if(!s.success)throw new Error(s.msg+' ('+s.code+')');
+      specCache[d.id]=parseSpec(s.result);
+    }
+    const r=await api(d,'GET','/v1.0/devices/'+d.id+'/status');
+    if(!r.success)throw new Error(r.msg+' ('+r.code+')');
+    if(d===dev()){
+      st={};r.result.forEach(x=>st[x.code]=x.value);err='';
+      $('upd').textContent=new Date().toTimeString().split(' ')[0];
+      integrate();alerts();liveNotif();
+    }
+  }catch(e){err=String(e.message||e)}
+  busy=false;render();
+}
+async function send(c,v){
+  const d=dev();st[c]=v;render();
+  try{
+    const r=await api(d,'POST','/v1.0/devices/'+d.id+'/commands',{commands:[{code:c,value:v}]});
+    err=r.success?'':(r.msg+' ('+r.code+')');
+  }catch(e){err=e.message}
+  render();setTimeout(poll,1500);
+}
+function stp(c,dir){
+  const s=sp(c).v,un=Math.max(s.step||1,scl(c));
+  let n=Number(st[c]!=null?st[c]:(s.min||0))+dir*un;
+  n=Math.max(s.min!=null?s.min:-1e9,Math.min(s.max!=null?s.max:1e9,n));
+  send(c,Math.round(n));
+}
+function pwrCode(){const f=SP().fn;return f.switch?'switch':Object.keys(f).find(k=>/switch/.test(k)&&f[k].type==='Boolean')}
+function togglePwr(){const c=pwrCode();if(c)send(c,!st[c])}
+
+// ---------- hisob-kitob ----------
+const numKeys=()=>Object.keys(st).filter(c=>typeof st[c]==='number');
+function pT(){
+  if(cfg.tCode&&st[cfg.tCode]!=null)return cfg.tCode;
+  const t=numKeys().filter(c=>/temp/.test(c));
+  return t.find(c=>/temp_current|outlet|out_|supply/.test(c))||t[0]||null;
+}
+function pP(){
+  if(cfg.pCode&&typeof st[cfg.pCode]==='number')return cfg.pCode;
+  return numKeys().find(c=>/^(cur_power|power|pwr|electric_power|active_power|total_power)/.test(c))||null;
+}
+function kw(){const c=pP();if(!c)return null;const v=num(c);return cfg.pUnit==='kW'?v:v/1000}
+function roll(){
+  const n=new Date(),p=x=>String(x).padStart(2,'0');
+  const dk=n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate()),mk=dk.slice(0,7);
+  const m=new Date(n);m.setDate(n.getDate()-((n.getDay()+6)%7));const wk=m.toDateString();
+  if(S.dk!==dk){S.dk=dk;S.d=0;S.ds=0}
+  if(S.wk!==wk){S.wk=wk;S.w=0}
+  if(S.mk!==mk){S.mk=mk;S.m=0}
+}
+function integrate(){
+  roll();
+  const now=Date.now(),dt=(now-lastT)/3.6e6;lastT=now;
+  const p=kw();if(p==null||dt>0.02)return;
+  const e=p*dt,h=new Date().getHours();
+  S.d+=e;S.w+=e;S.m+=e;
+  if(cfg.solar&&h>=cfg.s0&&h<cfg.s1)S.ds+=e;
+  SV('mp5_stat',S);
+}
+function cost(kwh,base){
+  let c=0,prev=0,zone=1,rate=cfg.tiers[0][1];const s=base,e=base+kwh;
+  cfg.tiers.forEach(function(t,i){
+    if(e>prev){zone=i+1;rate=t[1]}
+    const a=Math.max(s,prev),b=Math.min(e,t[0]);if(b>a)c+=(b-a)*t[1];prev=t[0];
+  });
+  return {c:Math.round(c),zone:zone,rate:rate};
+}
+function resetStats(){if(!confirm("Statistika 0 qilinsinmi?"))return;S={dk:'',mk:'',wk:'',d:0,ds:0,w:0,m:0};SV('mp5_stat',S);render()}
+
+// ---------- bildirishnoma ----------
+const LN=()=>window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
+let lastLive=0,lastAlert=0;
+async function note(id,title,body,ongoing){try{const n=LN();if(n)await n.schedule({notifications:[{id:id,title:title,body:body,ongoing:!!ongoing,autoCancel:!ongoing}]})}catch(e){}}
+function liveNotif(){
+  if(!cfg.live||Date.now()-lastLive<30000)return;lastLive=Date.now();
+  const t=pT(),p=kw();
+  note(1001,dev().name,(t?fmt(t,st[t]):'--')+(p!=null?' | '+p.toFixed(2)+' kW':'')+' | Bugun '+S.d.toFixed(2)+' kWh',true);
+}
+function alerts(){
+  const t=pT();if(!t||Date.now()-lastAlert<1800000)return;
+  const v=num(t);
+  if(v<cfg.min){lastAlert=Date.now();note(1002,'Muzlash xavfi!',dev().name+': '+fmt(t,st[t]))}
+  else if(v>cfg.max){lastAlert=Date.now();note(1003,'Qizib ketish!',dev().name+': '+fmt(t,st[t]))}
+}
+
+// ---------- UI ----------
+function ctl(e){
+  const c=e.code,v=st[c];
+  if(c===pwrCode())return '';
+  if(e.type==='Boolean')return '<div class="tile row"><span style="font-size:13px;font-weight:700">'+c+'</span><button class="btn '+(v?'on':'')+'" onclick="send(\''+c+'\','+(!v)+')">'+(v?'ON':'OFF')+'</button></div>';
+  if(e.type==='Enum')return '<div class="tile"><div class="k">'+c+'</div><div class="chips">'+(e.v.range||[]).map(o=>'<button class="btn '+(o===v?'on':'')+'" onclick="send(\''+c+'\',\''+o+'\')">'+o+'</button>').join('')+'</div></div>';
+  if(e.type==='Integer')return '<div class="tile row"><div><div class="k">'+c+'</div><div class="v">'+(v!=null?fmt(c,v):'--')+'</div></div><div class="row"><button class="btn sq" onclick="stp(\''+c+'\',-1)">-</button><button class="btn sq on" onclick="stp(\''+c+'\',1)">+</button></div></div>';
+  return '';
+}
+function render(){
+  const d=dev();
+  $('err').style.display=err?'block':'none';$('err').textContent=err;
+  $('dot').style.color=err?'#f59e0b':'#10b981';
+  $('devSel').innerHTML=devices.map((x,i)=>'<option value="'+i+'" '+(i===act?'selected':'')+'>'+x.name+'</option>').join('');
+  if(!d)return;
+  const spc=SP(),pc=pwrCode(),pb=$('pwr');
+  if(pc){pb.style.display='';pb.textContent=st[pc]?'ON':'OFF';pb.style.background=st[pc]?'#10b981':'#e11d48';pb.style.color=st[pc]?'#050811':'#fff'}else pb.style.display='none';
+  const t=pT(),p=kw();
+  $('heroK').textContent=t||'Harorat';$('heroV').textContent=t?fmt(t,st[t]):'--';
+  $('heroP').textContent=p!=null?p.toFixed(2)+' kW':'--';
+  $('ctrl').innerHTML=Object.keys(spc.fn).map(c=>ctl(spc.fn[c])).join('')||'<div class="hint">Boshqariladigan funksiya topilmadi</div>';
+  $('sens').innerHTML=Object.keys(st).filter(c=>!spc.fn[c]).map(c=>'<div class="tile row"><span class="k">'+c+'</span><b>'+fmt(c,st[c])+'</b></div>').join('');
+  $('raw').textContent=JSON.stringify(st);
+  // statistika
+  const base=Number(cfg.base)||0,mc=cost(S.m,base),rate=mc.rate;
+  $('meter').textContent=(base+S.m).toFixed(2)+' kWh';
+  $('zone').textContent=mc.zone+'-zona | '+rate+' so\'m';
+  $('pNote').textContent=pP()?'Quvvat manbai: '+pP()+' ('+cfg.pUnit+')':'Quvvat datchigi topilmadi - Sozlamalardan tanlang.';
+  $('dK').textContent=S.d.toFixed(2)+' kWh';$('dS').textContent='Quyosh: '+S.ds.toFixed(2);
+  $('dC').textContent=Math.round(Math.max(0,S.d-S.ds)*rate).toLocaleString()+" so'm";
+  $('wK').textContent=S.w.toFixed(2)+' kWh';$('wC').textContent=Math.round(S.w*rate).toLocaleString()+" so'm";
+  $('mK').textContent=S.m.toFixed(2)+' kWh';$('mC').textContent=mc.c.toLocaleString()+" so'm";
+}
+function renderDevs(){
+  $('devList').innerHTML=devices.map((x,i)=>'<div class="tile row" style="border-color:'+(i===act?'#ff7b00':'#1e293b')+'"><div onclick="selectDev('+i+')"><b style="font-size:13px">'+x.name+'</b><div class="k" style="font-family:monospace">'+x.id+' | '+(x.mode==='profile'?'Profil':'API Key')+'</div></div><button class="btn" style="color:#f43f5e" onclick="removeDev('+i+')">&#10005;</button></div>').join('')||'<div class="hint">Qurilma yo\'q</div>';
+}
+function selectDev(i){act=i;st={};err='';SV('mp5_act',act);renderDevs();render();poll()}
+function removeDev(i){
+  if(!confirm("O'chirilsinmi?"))return;
+  devices.splice(i,1);act=0;SV('mp5_dev',devices);SV('mp5_act',0);st={};renderDevs();render();
+  if(!devices.length)showLogin(1);else poll();
+}
+function addDev(d){devices.push(d);SV('mp5_dev',devices);hideLogin();selectDev(devices.length-1)}
+function openPage(p){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('on'));$('p-'+p).classList.add('on');
+  ['home','stats','dev','set'].forEach(k=>$('n-'+k).className=k===p?'on':'');
+  if(p==='set')fillSettings();
+}
+
+// ---------- kirish oynasi ----------
+const msg=t=>$('loginMsg').textContent=t;
+function way(w){
+  $('w1').style.display=w===1?'block':'none';$('w2').style.display=w===2?'block':'none';
+  $('tw1').className=w===1?'btn on':'btn';$('tw2').className=w===2?'btn on':'btn';
+}
+function showLogin(w){msg('');$('login').classList.add('show');way(w||1);$('closeLogin').style.display=devices.length?'':'none'}
+function hideLogin(){$('login').classList.remove('show')}
+async function addKey(){
+  const d={mode:'key',endpoint:$('rg1').value,cid:$('cid1').value.trim(),sec:$('sec1').value.trim(),id:$('did1').value.trim(),name:$('nm1').value.trim()};
+  if(!d.cid||!d.sec||!d.id)return msg('Access ID, Secret va Device ID ni kiriting');
+  msg('Tekshirilmoqda...');
+  try{
+    const r=await api(d,'GET','/v1.0/devices/'+d.id);
+    if(!r.success)return msg('Xato: '+r.msg+' ('+r.code+')');
+    if(!d.name)d.name=(r.result&&r.result.name)||'Nasos';
+    addDev(d);
+  }catch(e){msg('Ulanish xatosi: '+e.message)}
+}
+async function loginProfile(){
+  const b={endpoint:$('rg2').value,cid:$('cid2').value.trim(),sec:$('sec2').value.trim()};
+  const u=$('usr').value.trim(),p=$('pas').value;
+  if(!b.cid||!b.sec||!u||!p)return msg("Barcha maydonlarni to'ldiring");
+  msg('Kirilmoqda...');
+  try{
+    const r=await api(b,'POST','/v1.0/iot-01/associated-users/actions/authorized-login',{country_code:$('cc').value.trim(),username:u,password:SparkMD5.hash(p),schema:$('sch').value});
+    if(!r.success)return msg('Kirish xatosi: '+r.msg+' ('+r.code+')');
+    const uid=r.result.uid,l=await api(b,'GET','/v1.0/users/'+uid+'/devices');
+    if(!l.success)return msg('Qurilmalar xatosi: '+l.msg+' ('+l.code+')');
+    found=(l.result||[]).map(x=>({mode:'profile',endpoint:b.endpoint,cid:b.cid,sec:b.sec,id:x.id,name:x.name,uid:uid,cat:x.category}));
+    $('found').innerHTML=found.map((x,i)=>'<div class="tile row"><span style="font-size:13px">'+x.name+' <small class="k">'+(x.cat||'')+'</small></span><button class="btn on" onclick="addFound('+i+')">Qo\'shish</button></div>').join('')||'<div class="hint">Qurilma topilmadi</div>';
+    msg('Qurilmani tanlang');
+  }catch(e){msg('Xato: '+e.message)}
+}
+function addFound(i){addDev(found[i])}
+
+// ---------- sozlamalar ----------
+function fillSettings(){
+  $('cfgLive').checked=cfg.live;$('cfgMin').value=cfg.min;$('cfgMax').value=cfg.max;
+  $('cfgBase').value=cfg.base;$('cfgSolar').checked=cfg.solar;$('cfgS0').value=cfg.s0;$('cfgS1').value=cfg.s1;$('cfgU').value=cfg.pUnit;
+  const nk=Object.keys(SP().all).filter(c=>['Integer'].includes(SP().all[c].type));
+  const opts=sel=>'<option value="">Avto</option>'+nk.map(c=>'<option value="'+c+'" '+(c===sel?'selected':'')+'>'+c+'</option>').join('');
+  $('cfgP').innerHTML=opts(cfg.pCode);$('cfgT').innerHTML=opts(cfg.tCode);
+  $('tiers').innerHTML=cfg.tiers.map((t,i)=>'<div class="g2"><input id="l'+i+'" type="number" class="inp" value="'+(i===5?'':t[0])+'" '+(i===5?'disabled placeholder="cheksiz"':'')+'><input id="r'+i+'" type="number" class="inp" value="'+t[1]+'"></div>').join('');
+}
+function saveSettings(){
+  cfg.live=$('cfgLive').checked;cfg.min=+$('cfgMin').value;cfg.max=+$('cfgMax').value;
+  cfg.base=+$('cfgBase').value;cfg.solar=$('cfgSolar').checked;cfg.s0=+$('cfgS0').value;cfg.s1=+$('cfgS1').value;
+  cfg.pCode=$('cfgP').value;cfg.pUnit=$('cfgU').value;cfg.tCode=$('cfgT').value;
+  cfg.tiers=cfg.tiers.map((t,i)=>[i===5?1e9:(+$('l'+i).value||t[0]),+$('r'+i).value||t[1]]);
+  SV('mp5_cfg',cfg);render();openPage('home');
+}
+
+// ---------- start ----------
+try{if(LN())LN().requestPermissions().catch(function(){})}catch(e){}
+renderDevs();render();
+if(!devices.length)showLogin(1);else poll();
+setInterval(poll,5000);
+</script>
+</body>
+</html>
