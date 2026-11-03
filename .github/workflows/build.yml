@@ -1,32 +1,38 @@
-﻿name: Build Pure Native Kotlin APK (No Cache Error)
-
+name: Build Mango Pro APK
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main" ]
   workflow_dispatch:
-
 jobs:
-  build-native-apk:
+  build-apk:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 1. Checkout code
-        uses: actions/checkout@v4
-
-      - name: 2. Setup Java JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: 3. Give execution permission to gradlew
-        run: chmod +x gradlew
-
-      - name: 4. Build Native Android APK
-        run: ./gradlew assembleDebug
-
-      - name: 5. Upload MangoPro-v5-PURE-NATIVE-APK
-        uses: actions/upload-artifact@v4
+          node-version: 20
+      - uses: actions/setup-java@v4
         with:
-          name: MangoPro-v5-PURE-NATIVE-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          distribution: temurin
+          java-version: 17
+      - name: Install deps
+        run: |
+          npm install
+          cp node_modules/spark-md5/spark-md5.min.js www/
+      - name: Add Android platform
+        run: |
+          rm -rf android
+          npx cap add android
+          if [ -f assets/icon-only.png ]; then npx capacitor-assets generate --android || true; fi
+          sed -i 's#<application#<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <application#' android/app/src/main/AndroidManifest.xml
+          npx cap sync android
+          if grep -q '"url"' android/app/src/main/assets/capacitor.config.json; then echo "server.url topildi"; exit 1; fi
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MangoPro-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk

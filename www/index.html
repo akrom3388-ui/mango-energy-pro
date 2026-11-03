@@ -41,7 +41,7 @@ input,select,button{font-family:inherit;outline:none;border:none}
 
 <!-- KIRISH -->
 <div id="login" class="ov"><div class="wrap">
-  <h1 style="text-align:center;font-size:22px;margin:8px 0 14px">MANGO ENERGY PRO</h1>
+  <h1 style="text-align:center;font-size:22px;margin:8px 0 14px">MANGO ENERGY PRO <small style="font-size:11px;color:var(--mu)">v5.1</small></h1>
   <div class="g2" style="margin-bottom:12px">
     <button id="tw1" class="btn on" onclick="way(1)">&#128273; Access ID / Key</button>
     <button id="tw2" class="btn" onclick="way(2)">&#128100; Tuya Login</button>
@@ -108,6 +108,8 @@ input,select,button{font-family:inherit;outline:none;border:none}
         <div style="text-align:right"><div class="k">Quvvat</div><div class="v" id="heroP">--</div></div>
       </div>
     </div>
+    <div class="card"><div class="row"><span class="k">TREND (30 daq)</span><span class="k">sariq: harorat | ko'k: kW</span></div><canvas id="cv" width="480" height="120" style="width:100%;height:120px"></canvas></div>
+    <div class="card"><div class="row"><b style="font-size:13px">Tayyor rejimlar</b><button class="btn" onclick="savePreset()">+ Saqlash</button></div><div id="presets" class="chips"></div></div>
     <div class="k" style="margin:4px 2px 6px">BOSHQARUV</div><div id="ctrl"></div>
     <div class="k" style="margin:4px 2px 6px">DATCHIKLAR</div><div id="sens"></div>
   </div>
@@ -122,6 +124,9 @@ input,select,button{font-family:inherit;outline:none;border:none}
         <div class="tile"><div class="k">HAFTA</div><div class="v" id="wK">0</div><div class="k" id="wC"></div></div>
       </div>
       <div class="tile"><div class="k">OY</div><div class="v" id="mK">0</div><div class="k" id="mC"></div></div>
+      <div class="tile"><div class="k">SO'NGGI 14 KUN (kWh)</div><div id="hist" style="display:flex;align-items:flex-end;gap:3px;margin-top:8px;min-height:80px"></div></div>
+      <div class="tile"><div class="row"><span class="k">HODISALAR JURNALI</span><button class="btn" onclick="events=[];SV('mp5_ev',[]);render()">Tozalash</button></div><div id="evs" style="max-height:180px;overflow-y:auto;font-size:11px;margin-top:6px"></div></div>
+      <button class="btn big" style="margin-bottom:8px" onclick="copyReport()">Hisobotni nusxalash</button>
       <button class="btn big" style="color:var(--r)" onclick="resetStats()">Statistikani 0 qilish</button>
     </div>
   </div>
@@ -160,6 +165,7 @@ input,select,button{font-family:inherit;outline:none;border:none}
     <div class="card">
       <b>Pog'onali tarif (yuqori chegara kWh / narx so'm)</b>
       <label class="lbl">Oy boshidagi schyotchik (kWh)</label><input id="cfgBase" type="number" step="0.01" class="inp">
+      <label class="lbl">Oylik byudjet (so'm, 0 = o'chiq)</label><input id="cfgBud" type="number" class="inp">
       <div id="tiers"></div>
       <div class="row" style="margin-top:10px"><span style="font-size:12px">Quyosh soatlarida tekin hisoblash</span><input type="checkbox" id="cfgSolar"></div>
       <div class="g2">
@@ -180,6 +186,7 @@ input,select,button{font-family:inherit;outline:none;border:none}
 
 <script src="spark-md5.min.js"></script>
 <script>
+if(/^https?:$/.test(location.protocol)&&!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)){document.body.innerHTML='<div style="padding:30px;color:#fff">Bu eski versiya (veb-saytdan yuklanmoqda). Telefondan o\'chirib, yangi APK ni o\'rnating.</div>';throw new Error('remote');}
 const $=i=>document.getElementById(i);
 const LS=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
 const SV=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -195,6 +202,8 @@ let cfg=Object.assign({},DEF,LS('mp5_cfg',{}));
 let S=Object.assign({dk:'',mk:'',wk:'',d:0,ds:0,w:0,m:0},LS('mp5_stat',{}));
 let st={},err='',tok={},specCache={},lastT=Date.now(),busy=false,found=[];
 if(act>=devices.length)act=0;
+let events=LS('mp5_ev',[]),tr=[],down=false,fault='',presets=LS('mp5_pre',{});
+function ev(t){events.unshift(new Date().toLocaleString()+' - '+t);events=events.slice(0,100);SV('mp5_ev',events)}
 const dev=()=>devices[act];
 
 // ---------- Tuya API ----------
@@ -249,13 +258,17 @@ async function poll(){
     if(d===dev()){
       st={};r.result.forEach(x=>st[x.code]=x.value);err='';
       $('upd').textContent=new Date().toTimeString().split(' ')[0];
-      integrate();alerts();liveNotif();
+      if(down){ev('Aloqa tiklandi');down=false}
+      const fa=Object.keys(st).filter(c=>/fault|err|alarm|protect/.test(c)&&st[c]&&st[c]!==0).map(c=>c+'='+st[c]).join(', ');
+      if(fa!==fault){ev(fa?'AVARIYA: '+fa:'Avariya tugadi');fault=fa}
+      const tt=pT(),pk=kw();tr.push({v:tt?num(tt):null,p:pk});if(tr.length>360)tr.shift();
+      integrate();alerts();budgetCheck();liveNotif();
     }
-  }catch(e){err=String(e.message||e)}
+  }catch(e){err=String(e.message||e);if(!down){down=true;ev('Aloqa xatosi: '+err)}}
   busy=false;render();
 }
 async function send(c,v){
-  const d=dev();st[c]=v;render();
+  const d=dev();st[c]=v;ev(c+' = '+v);render();
   try{
     const r=await api(d,'POST','/v1.0/devices/'+d.id+'/commands',{commands:[{code:c,value:v}]});
     err=r.success?'':(r.msg+' ('+r.code+')');
@@ -298,6 +311,7 @@ function integrate(){
   const e=p*dt,h=new Date().getHours();
   S.d+=e;S.w+=e;S.m+=e;
   if(cfg.solar&&h>=cfg.s0&&h<cfg.s1)S.ds+=e;
+  S.h=S.h||{};S.h[S.dk]=S.d;{const k=Object.keys(S.h).sort();while(k.length>60)delete S.h[k.shift()]}
   SV('mp5_stat',S);
 }
 function cost(kwh,base){
@@ -322,8 +336,8 @@ function liveNotif(){
 function alerts(){
   const t=pT();if(!t||Date.now()-lastAlert<1800000)return;
   const v=num(t);
-  if(v<cfg.min){lastAlert=Date.now();note(1002,'Muzlash xavfi!',dev().name+': '+fmt(t,st[t]))}
-  else if(v>cfg.max){lastAlert=Date.now();note(1003,'Qizib ketish!',dev().name+': '+fmt(t,st[t]))}
+  if(v<cfg.min){lastAlert=Date.now();ev('Past harorat');note(1002,'Muzlash xavfi!',dev().name+': '+fmt(t,st[t]))}
+  else if(v>cfg.max){lastAlert=Date.now();ev('Yuqori harorat');note(1003,'Qizib ketish!',dev().name+': '+fmt(t,st[t]))}
 }
 
 // ---------- UI ----------
@@ -337,7 +351,7 @@ function ctl(e){
 }
 function render(){
   const d=dev();
-  $('err').style.display=err?'block':'none';$('err').textContent=err;
+  const em=err||(fault?'AVARIYA: '+fault:'');$('err').style.display=em?'block':'none';$('err').textContent=em;
   $('dot').style.color=err?'#f59e0b':'#10b981';
   $('devSel').innerHTML=devices.map((x,i)=>'<option value="'+i+'" '+(i===act?'selected':'')+'>'+x.name+'</option>').join('');
   if(!d)return;
@@ -358,11 +372,16 @@ function render(){
   $('dC').textContent=Math.round(Math.max(0,S.d-S.ds)*rate).toLocaleString()+" so'm";
   $('wK').textContent=S.w.toFixed(2)+' kWh';$('wC').textContent=Math.round(S.w*rate).toLocaleString()+" so'm";
   $('mK').textContent=S.m.toFixed(2)+' kWh';$('mC').textContent=mc.c.toLocaleString()+" so'm";
+  const ks=Object.keys(S.h||{}).sort().slice(-14),mx=Math.max(1,...ks.map(k=>S.h[k]));
+  $('hist').innerHTML=ks.map(k=>'<div title="'+k+'" style="flex:1;text-align:center;font-size:8px;color:var(--mu)">'+S.h[k].toFixed(0)+'<div style="background:linear-gradient(var(--m2),var(--m));height:'+Math.max(2,S.h[k]/mx*60)+'px;border-radius:3px"></div>'+k.slice(8)+'</div>').join('')||'<div class="hint">Ma\'lumot yig\'ilmoqda</div>';
+  $('evs').innerHTML=events.map(e=>'<div style="padding:3px 0;border-bottom:1px solid var(--bd)">'+e+'</div>').join('')||'<div class="hint">Hodisa yo\'q</div>';
+  $('presets').innerHTML=PR().map((x,i)=>'<span class="row" style="gap:2px"><button class="btn on" onclick="applyPreset('+i+')">'+x.n+'</button><button class="btn" onclick="delPreset('+i+')">&#10005;</button></span>').join('')||'<span class="hint">Hozirgi sozlamani saqlang</span>';
+  draw();
 }
 function renderDevs(){
   $('devList').innerHTML=devices.map((x,i)=>'<div class="tile row" style="border-color:'+(i===act?'#ff7b00':'#1e293b')+'"><div onclick="selectDev('+i+')"><b style="font-size:13px">'+x.name+'</b><div class="k" style="font-family:monospace">'+x.id+' | '+(x.mode==='profile'?'Profil':'API Key')+'</div></div><button class="btn" style="color:#f43f5e" onclick="removeDev('+i+')">&#10005;</button></div>').join('')||'<div class="hint">Qurilma yo\'q</div>';
 }
-function selectDev(i){act=i;st={};err='';SV('mp5_act',act);renderDevs();render();poll()}
+function selectDev(i){act=i;st={};err='';tr=[];fault='';SV('mp5_act',act);renderDevs();render();poll()}
 function removeDev(i){
   if(!confirm("O'chirilsinmi?"))return;
   devices.splice(i,1);act=0;SV('mp5_dev',devices);SV('mp5_act',0);st={};renderDevs();render();
@@ -373,6 +392,39 @@ function openPage(p){
   document.querySelectorAll('.page').forEach(e=>e.classList.remove('on'));$('p-'+p).classList.add('on');
   ['home','stats','dev','set'].forEach(k=>$('n-'+k).className=k===p?'on':'');
   if(p==='set')fillSettings();
+}
+
+// ---------- qo'shimcha: grafik, rejimlar, byudjet, hisobot ----------
+function draw(){
+  const c=$('cv'),x=c.getContext('2d');x.clearRect(0,0,480,120);
+  [['v','#ffae00'],['p','#38bdf8']].forEach(function(q){
+    const a=tr.map(o=>o[q[0]]).filter(v=>v!=null);if(a.length<2)return;
+    const mn=Math.min.apply(null,a),r=(Math.max.apply(null,a)-mn)||1;
+    x.strokeStyle=q[1];x.lineWidth=2;x.beginPath();let first=true;
+    tr.forEach(function(o,i){const v=o[q[0]];if(v==null)return;const X=i/(tr.length-1)*480,Y=112-(v-mn)/r*100;if(first){x.moveTo(X,Y);first=false}else x.lineTo(X,Y)});
+    x.stroke();
+  });
+}
+const PR=()=>presets[dev().id]||(presets[dev().id]=[]);
+function savePreset(){
+  const n=prompt('Rejim nomi:');if(!n)return;const v={};
+  Object.keys(SP().fn).forEach(c=>{if(st[c]!=null&&c!==pwrCode())v[c]=st[c]});
+  PR().push({n:n,v:v});SV('mp5_pre',presets);render();
+}
+async function applyPreset(i){
+  const p=PR()[i],d=dev();
+  try{const r=await api(d,'POST','/v1.0/devices/'+d.id+'/commands',{commands:Object.keys(p.v).map(c=>({code:c,value:p.v[c]}))});err=r.success?'':r.msg+' ('+r.code+')';ev('Rejim: '+p.n)}catch(e){err=e.message}
+  Object.assign(st,p.v);render();setTimeout(poll,1500);
+}
+function delPreset(i){if(confirm("O'chirilsinmi?")){PR().splice(i,1);SV('mp5_pre',presets);render()}}
+function budgetCheck(){
+  const c=cost(S.m,+cfg.base||0).c;
+  if(cfg.budget&&S.bm!==S.mk&&c>cfg.budget){S.bm=S.mk;ev('Oylik byudjet oshdi');note(1004,'Byudjet oshdi',c.toLocaleString()+" so'm")}
+}
+function copyReport(){
+  const m=cost(S.m,+cfg.base||0);
+  const t='Mango Energy Pro hisoboti\nQurilma: '+dev().name+'\nBugun: '+S.d.toFixed(2)+' kWh\nHafta: '+S.w.toFixed(2)+' kWh\nOy: '+S.m.toFixed(2)+" kWh = "+m.c.toLocaleString()+" so'm\n"+Object.keys(S.h||{}).sort().map(k=>k+': '+S.h[k].toFixed(2)).join('\n');
+  navigator.clipboard.writeText(t).then(()=>alert('Nusxalandi'));
 }
 
 // ---------- kirish oynasi ----------
@@ -414,7 +466,7 @@ function addFound(i){addDev(found[i])}
 // ---------- sozlamalar ----------
 function fillSettings(){
   $('cfgLive').checked=cfg.live;$('cfgMin').value=cfg.min;$('cfgMax').value=cfg.max;
-  $('cfgBase').value=cfg.base;$('cfgSolar').checked=cfg.solar;$('cfgS0').value=cfg.s0;$('cfgS1').value=cfg.s1;$('cfgU').value=cfg.pUnit;
+  $('cfgBase').value=cfg.base;$('cfgBud').value=cfg.budget||0;$('cfgSolar').checked=cfg.solar;$('cfgS0').value=cfg.s0;$('cfgS1').value=cfg.s1;$('cfgU').value=cfg.pUnit;
   const nk=Object.keys(SP().all).filter(c=>['Integer'].includes(SP().all[c].type));
   const opts=sel=>'<option value="">Avto</option>'+nk.map(c=>'<option value="'+c+'" '+(c===sel?'selected':'')+'>'+c+'</option>').join('');
   $('cfgP').innerHTML=opts(cfg.pCode);$('cfgT').innerHTML=opts(cfg.tCode);
@@ -422,7 +474,7 @@ function fillSettings(){
 }
 function saveSettings(){
   cfg.live=$('cfgLive').checked;cfg.min=+$('cfgMin').value;cfg.max=+$('cfgMax').value;
-  cfg.base=+$('cfgBase').value;cfg.solar=$('cfgSolar').checked;cfg.s0=+$('cfgS0').value;cfg.s1=+$('cfgS1').value;
+  cfg.base=+$('cfgBase').value;cfg.budget=+$('cfgBud').value;cfg.solar=$('cfgSolar').checked;cfg.s0=+$('cfgS0').value;cfg.s1=+$('cfgS1').value;
   cfg.pCode=$('cfgP').value;cfg.pUnit=$('cfgU').value;cfg.tCode=$('cfgT').value;
   cfg.tiers=cfg.tiers.map((t,i)=>[i===5?1e9:(+$('l'+i).value||t[0]),+$('r'+i).value||t[1]]);
   SV('mp5_cfg',cfg);render();openPage('home');
