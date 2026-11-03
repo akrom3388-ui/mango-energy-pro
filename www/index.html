@@ -42,13 +42,13 @@
       </div>
       <div class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
         <span id="connDot" class="w-2 h-2 rounded-full bg-amber-400 pulse-dot"></span>
-        <span id="connText">Tuya Direct • <b id="lastUpd" class="text-slate-200">--:--:--</b></span>
+        <span id="connText">Tuya Direct вЂў <b id="lastUpd" class="text-slate-200">--:--:--</b></span>
       </div>
     </div>
   </div>
   <div class="flex items-center gap-2">
-    <button onclick="openAlerts()" class="relative w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-lg active:scale-95 shadow">🔔<span id="alertBadge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-[10px] font-black flex items-center justify-center">0</span></button>
-    <button onclick="openSettings()" class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-lg active:scale-95 shadow">⚙️</button>
+    <button onclick="openAlerts()" class="relative w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-lg active:scale-95 shadow">рџ””<span id="alertBadge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-[10px] font-black flex items-center justify-center">0</span></button>
+    <button onclick="openSettings()" class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-lg active:scale-95 shadow">вљ™пёЏ</button>
     <button onclick="togglePower()" id="pwrBtn" class="px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-lg transition-all active:scale-95">
       YUKLANMOQDA...
     </button>
@@ -59,16 +59,16 @@
 
   <!-- BIRINCHI SOZLASH BANNERI -->
   <div id="setupBanner" class="hidden glass rounded-2xl p-4 border border-orange-500/40">
-    <div class="font-extrabold text-sm text-orange-400">👋 Xush kelibsiz!</div>
+    <div class="font-extrabold text-sm text-orange-400">рџ‘‹ Xush kelibsiz!</div>
     <div class="text-xs text-slate-300 mt-1">Boshlash uchun Tuya akkauntingizni ulang va teplovoy nasosingizni qo'shing.</div>
-    <button onclick="openSettings('account')" class="mt-3 px-4 py-2 rounded-xl mango-grad text-slate-950 font-extrabold text-xs">Akkaunt ulash →</button>
+    <button onclick="openSettings('account')" class="mt-3 px-4 py-2 rounded-xl mango-grad text-slate-950 font-extrabold text-xs">Akkaunt ulash в†’</button>
   </div>
 
   <!-- QURILMA TANLASH -->
   <div id="devBar" class="glass rounded-2xl p-3 flex items-center justify-between border border-slate-800">
     <div class="min-w-0">
       <div class="text-[10px] text-slate-400">Faol qurilma</div>
-      <div class="text-sm font-extrabold truncate" id="devName">—</div>
+      <div class="text-sm font-extrabold truncate" id="devName">вЂ”</div>
     </div>
     <select id="devSelect" onchange="switchDevice(this.value)" class="bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold px-2 py-1.5 max-w-[50%]"></select>
   </div>
@@ -80,8 +80,8 @@
       <div class="text-[10px] text-slate-400" id="sysModeDesc">Radiator rejimi</div>
     </div>
     <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
-      <button onclick="setSysMode('radiator')" id="btnRad" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">♨️ Radiator</button>
-      <button onclick="setSysMode('fancoil')" id="btnFan" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">🌀 Fankoil</button>
+      <button onclick="setSysMode('radiator')" id="btnRad" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">в™ЁпёЏ Radiator</button>
+      <button onclick="setSysMode('fancoil')" id="btnFan" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">рџЊЂ Fankoil</button>
     </div>
   </div>
 
@@ -90,7 +90,7 @@
     <div class="flex justify-between items-center mb-4">
       <div>
         <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Maqsadli Harorat (Set Temp)</span>
-        <div class="text-4xl font-black text-orange-400 mt-0.5"><span id="targetTemp">45.0</span>°C</div>
+        <div class="text-4xl font-black text-orange-400 mt-0.5"><span id="targetTemp">45.0</span>В°C</div>
       </div>
       <div class="flex items-center gap-2.5">
         <button onclick="changeTemp(-1)" class="w-12 h-12 rounded-2xl bg-slate-800 active:scale-90 text-2xl font-bold border border-slate-700 shadow">-</button>
@@ -101,19 +101,19 @@
     <div class="grid grid-cols-4 gap-2 text-center pt-3 border-t border-slate-800/80">
       <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800/60">
         <div class="text-[10px] text-slate-400">Padacha</div>
-        <div class="text-base font-extrabold text-red-400 mt-0.5"><span id="outTemp">--</span>°C</div>
+        <div class="text-base font-extrabold text-red-400 mt-0.5"><span id="outTemp">--</span>В°C</div>
       </div>
       <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800/60">
         <div class="text-[10px] text-slate-400">Obratka</div>
-        <div class="text-base font-extrabold text-sky-400 mt-0.5"><span id="inTemp">--</span>°C</div>
+        <div class="text-base font-extrabold text-sky-400 mt-0.5"><span id="inTemp">--</span>В°C</div>
       </div>
       <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800/60">
         <div class="text-[10px] text-slate-400">Bufer/GVS</div>
-        <div class="text-base font-extrabold text-amber-400 mt-0.5"><span id="dhwTemp">--</span>°C</div>
+        <div class="text-base font-extrabold text-amber-400 mt-0.5"><span id="dhwTemp">--</span>В°C</div>
       </div>
       <div class="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800/60">
         <div class="text-[10px] text-slate-400">Ko'cha</div>
-        <div class="text-base font-extrabold text-emerald-400 mt-0.5"><span id="ambTemp">--</span>°C</div>
+        <div class="text-base font-extrabold text-emerald-400 mt-0.5"><span id="ambTemp">--</span>В°C</div>
       </div>
     </div>
   </div>
@@ -141,40 +141,40 @@
   <div class="glass rounded-3xl p-4 space-y-3">
     <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Ishlash Rejimi (Mode)</div>
     <div class="grid grid-cols-4 gap-2" id="modeBtns">
-      <button onclick="setMode('heating')" data-m="heating" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">🔥 Isitish</button>
-      <button onclick="setMode('cooling')" data-m="cooling" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">❄️ Sovutish</button>
-      <button onclick="setMode('dhw')" data-m="dhw" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">🚿 Issiq Suv</button>
-      <button onclick="setMode('auto')" data-m="auto" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">🤖 Avto</button>
+      <button onclick="setMode('heating')" data-m="heating" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">рџ”Ґ Isitish</button>
+      <button onclick="setMode('cooling')" data-m="cooling" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">вќ„пёЏ Sovutish</button>
+      <button onclick="setMode('dhw')" data-m="dhw" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">рџљї Issiq Suv</button>
+      <button onclick="setMode('auto')" data-m="auto" class="py-2.5 rounded-xl text-xs font-bold border border-slate-800">рџ¤– Avto</button>
     </div>
 
     <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 pt-1">Quvvat Profili</div>
     <div class="grid grid-cols-4 gap-2" id="presetBtns">
-      <button onclick="setPreset('normal')" data-p="normal" class="py-2 rounded-xl text-xs font-bold border border-slate-800">⚖️ Normal</button>
-      <button onclick="setPreset('eco')" data-p="eco" class="py-2 rounded-xl text-xs font-bold border border-slate-800">🌿 Eco</button>
-      <button onclick="setPreset('boost')" data-p="boost" class="py-2 rounded-xl text-xs font-bold border border-slate-800">⚡ Turbo</button>
-      <button onclick="setPreset('silent')" data-p="silent" class="py-2 rounded-xl text-xs font-bold border border-slate-800">🌙 Tungi</button>
+      <button onclick="setPreset('normal')" data-p="normal" class="py-2 rounded-xl text-xs font-bold border border-slate-800">вљ–пёЏ Normal</button>
+      <button onclick="setPreset('eco')" data-p="eco" class="py-2 rounded-xl text-xs font-bold border border-slate-800">рџЊї Eco</button>
+      <button onclick="setPreset('boost')" data-p="boost" class="py-2 rounded-xl text-xs font-bold border border-slate-800">вљЎ Turbo</button>
+      <button onclick="setPreset('silent')" data-p="silent" class="py-2 rounded-xl text-xs font-bold border border-slate-800">рџЊ™ Tungi</button>
     </div>
 
     <div class="grid grid-cols-3 gap-2 pt-1">
-      <button onclick="toggleExtra('weather_comp')" id="btnWeather" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">📈 EKD Krivaya</button>
-      <button onclick="toggleExtra('defrost')" id="btnDefrost" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">🧊 Defrost</button>
-      <button onclick="toggleExtra('sterilize')" id="btnLegion" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">🛡️ Anti-Legion</button>
+      <button onclick="toggleExtra('weather_comp')" id="btnWeather" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">рџ“€ EKD Krivaya</button>
+      <button onclick="toggleExtra('defrost')" id="btnDefrost" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">рџ§Љ Defrost</button>
+      <button onclick="toggleExtra('sterilize')" id="btnLegion" class="py-2 px-2 rounded-xl text-[11px] font-bold border border-slate-800">рџ›ЎпёЏ Anti-Legion</button>
     </div>
   </div>
 
   <!-- QURILMA MA'LUMOTLARI -->
   <div class="glass rounded-3xl p-4 space-y-2.5">
     <div class="flex items-center justify-between">
-      <div class="font-extrabold text-sm">📟 Qurilma Ma'lumotlari</div>
+      <div class="font-extrabold text-sm">рџ“џ Qurilma Ma'lumotlari</div>
       <button onclick="document.getElementById('rawBox').classList.toggle('hidden')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 font-bold">Barcha DP</button>
     </div>
     <div class="grid grid-cols-2 gap-2 text-[11px]">
-      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Nomi</div><div class="font-bold truncate" id="iName">—</div></div>
-      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Device ID</div><div class="font-bold truncate" id="iId">—</div></div>
-      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Server</div><div class="font-bold truncate" id="iSrv">—</div></div>
-      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Aloqa</div><div class="font-bold truncate" id="iConn">—</div></div>
-      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Delta T (Padacha-Obratka)</div><div class="font-bold" id="iDelta">—</div></div>
-      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Ishlash vaqti (seans)</div><div class="font-bold" id="iUp">—</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Nomi</div><div class="font-bold truncate" id="iName">вЂ”</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Device ID</div><div class="font-bold truncate" id="iId">вЂ”</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Server</div><div class="font-bold truncate" id="iSrv">вЂ”</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Aloqa</div><div class="font-bold truncate" id="iConn">вЂ”</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Delta T (Padacha-Obratka)</div><div class="font-bold" id="iDelta">вЂ”</div></div>
+      <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800"><div class="text-slate-400">Ishlash vaqti (seans)</div><div class="font-bold" id="iUp">вЂ”</div></div>
     </div>
     <div id="rawBox" class="hidden bg-slate-950 rounded-xl border border-slate-800 p-2.5 max-h-48 overflow-y-auto text-[11px] font-mono text-slate-300"></div>
   </div>
@@ -182,7 +182,7 @@
   <!-- STATISTIKA -->
   <div class="glass rounded-3xl p-4 space-y-3.5">
     <div class="flex items-center justify-between">
-      <div class="font-extrabold text-sm">📊 Aniq Statistika (Progressiv Tarif)</div>
+      <div class="font-extrabold text-sm">рџ“Љ Aniq Statistika (Progressiv Tarif)</div>
       <span class="text-[11px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
         Joriy seans: <b id="curSessMin">0</b> daq (<b id="curSessKwh">0.00</b> kWh)
       </span>
@@ -210,7 +210,7 @@
     </div>
 
     <div>
-      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">⏱️ Oxirgi Seanslar Tarixi</div>
+      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">вЏ±пёЏ Oxirgi Seanslar Tarixi</div>
       <div class="space-y-1.5 max-h-56 overflow-y-auto" id="sessionsList"></div>
     </div>
   </div>
@@ -221,12 +221,12 @@
 <div id="settingsModal" class="modal items-end sm:items-center justify-center p-0 sm:p-4">
   <div class="glass w-full max-w-md rounded-t-3xl sm:rounded-3xl p-4 border border-slate-700 flex flex-col" style="max-height:92vh">
     <div class="flex justify-between items-center pb-3">
-      <div class="font-extrabold text-base">⚙️ Sozlamalar</div>
-      <button onclick="closeSettings()" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400">✕</button>
+      <div class="font-extrabold text-base">вљ™пёЏ Sozlamalar</div>
+      <button onclick="closeSettings()" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400">вњ•</button>
     </div>
     <div class="flex gap-1.5 overflow-x-auto pb-2 border-b border-slate-800" id="tabBar"></div>
     <div class="overflow-y-auto flex-1 py-3 space-y-2.5 text-xs" id="tabBody"></div>
-    <button onclick="saveSettings()" class="w-full py-3 rounded-xl mango-grad text-slate-950 font-extrabold text-sm shadow-lg mt-2">💾 Saqlash</button>
+    <button onclick="saveSettings()" class="w-full py-3 rounded-xl mango-grad text-slate-950 font-extrabold text-sm shadow-lg mt-2">рџ’ѕ Saqlash</button>
   </div>
 </div>
 
@@ -234,10 +234,10 @@
 <div id="alertsModal" class="modal items-center justify-center p-4">
   <div class="glass w-full max-w-md rounded-3xl p-4 border border-slate-700 flex flex-col" style="max-height:85vh">
     <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-      <div class="font-extrabold text-base">🔔 Xabarlar tarixi</div>
+      <div class="font-extrabold text-base">рџ”” Xabarlar tarixi</div>
       <div class="flex gap-2">
         <button onclick="clearAlerts()" class="px-3 h-8 rounded-lg bg-slate-800 text-[11px] font-bold text-slate-300">Tozalash</button>
-        <button onclick="closeAlerts()" class="w-8 h-8 rounded-full bg-slate-800 font-bold text-slate-400">✕</button>
+        <button onclick="closeAlerts()" class="w-8 h-8 rounded-full bg-slate-800 font-bold text-slate-400">вњ•</button>
       </div>
     </div>
     <div class="overflow-y-auto flex-1 pt-3 space-y-2" id="alertsList"></div>
@@ -340,11 +340,11 @@ function notify(title, body, key, icon) {
   const now = Date.now();
   if (key && alertCooldown[key] && now - alertCooldown[key] < cfg.notif.cooldown * 60000) return;
   if (key) alertCooldown[key] = now;
-  alertsLog.unshift({ ts: now, title, body, icon: icon || "🔔" });
+  alertsLog.unshift({ ts: now, title, body, icon: icon || "рџ””" });
   alertsLog = alertsLog.slice(0, 60);
   localStorage.setItem("mango_alerts", JSON.stringify(alertsLog));
   unread++; renderBadge();
-  toast((icon || "🔔") + " " + title + " — " + body);
+  toast((icon || "рџ””") + " " + title + " вЂ” " + body);
   if (inQuiet()) return;
   sysNotify(title, body);
   if (cfg.notif.vibrate && navigator.vibrate) navigator.vibrate([200, 100, 200]);
@@ -357,7 +357,7 @@ async function askNotifPermission() {
     toast("Bu qurilmada tizim bildirishnomasi yo'q, ilova ichida ko'rsatiladi");
   } catch (e) { toast("Ruxsat so'rashda xato"); }
 }
-function testNotify() { notify("Test xabar", "Bildirishnomalar ishlayapti ✅", null, "✅"); }
+function testNotify() { notify("Test xabar", "Bildirishnomalar ishlayapti вњ…", null, "вњ…"); }
 function renderBadge() { const b = $("alertBadge"); if (unread > 0) { b.classList.remove("hidden"); b.innerText = unread > 99 ? "99+" : unread; } else b.classList.add("hidden"); }
 function openAlerts() {
   unread = 0; renderBadge();
@@ -412,7 +412,7 @@ function applyPower(v) {
   state.power = v;
   if (v && !was) {
     statsDB.cur = { start: Date.now(), e: 0, h: 0 };
-    if (cfg.notif.power) notify("Nasos yoqildi", (curDev() ? curDev().name : "Qurilma") + " ishga tushdi", "pwr_on", "🟢");
+    if (cfg.notif.power) notify("Nasos yoqildi", (curDev() ? curDev().name : "Qurilma") + " ishga tushdi", "pwr_on", "рџџў");
   }
   if (!v && was) {
     if (statsDB.cur) {
@@ -420,11 +420,11 @@ function applyPower(v) {
       if (mins >= 1 || statsDB.cur.e > 0.01) {
         statsDB.sessions.unshift({ start: statsDB.cur.start, end: Date.now(), min: mins, e: statsDB.cur.e, h: statsDB.cur.h });
         statsDB.sessions = statsDB.sessions.slice(0, 40);
-        if (cfg.notif.session) notify("Seans tugadi", mins + " daq, " + statsDB.cur.e.toFixed(2) + " kWh sarflandi", null, "⏱️");
+        if (cfg.notif.session) notify("Seans tugadi", mins + " daq, " + statsDB.cur.e.toFixed(2) + " kWh sarflandi", null, "вЏ±пёЏ");
       }
     }
     statsDB.cur = null;
-    if (cfg.notif.power) notify("Nasos o'chdi", (curDev() ? curDev().name : "Qurilma") + " to'xtadi", "pwr_off", "🔴");
+    if (cfg.notif.power) notify("Nasos o'chdi", (curDev() ? curDev().name : "Qurilma") + " to'xtadi", "pwr_off", "рџ”ґ");
   }
 }
 
@@ -521,13 +521,13 @@ function parseStatus(list) {
 
 function checkAlerts() {
   const N = cfg.notif, nm = curDev() ? curDev().name : "Qurilma";
-  if (N.error && state.err !== "OK") notify("Nosozlik: " + state.err, nm + " xato kodi berdi", "err_" + state.err, "⚠️");
-  if (N.highOut > 0 && state.power && state.outlet_temp >= N.highOut) notify("Padacha harorati yuqori", state.outlet_temp.toFixed(1) + "°C (chegara " + N.highOut + "°C)", "highout", "🌡️");
-  if (N.lowDhw > 0 && state.dhw_temp <= N.lowDhw) notify("Issiq suv sovib ketdi", "Bufer/GVS: " + state.dhw_temp.toFixed(1) + "°C", "lowdhw", "🚿");
-  if (N.freeze !== "" && !state.power && state.ambient_temp <= Number(N.freeze)) notify("Muzlash xavfi!", "Ko'cha " + state.ambient_temp.toFixed(1) + "°C, nasos o'chiq", "freeze", "🥶");
+  if (N.error && state.err !== "OK") notify("Nosozlik: " + state.err, nm + " xato kodi berdi", "err_" + state.err, "вљ пёЏ");
+  if (N.highOut > 0 && state.power && state.outlet_temp >= N.highOut) notify("Padacha harorati yuqori", state.outlet_temp.toFixed(1) + "В°C (chegara " + N.highOut + "В°C)", "highout", "рџЊЎпёЏ");
+  if (N.lowDhw > 0 && state.dhw_temp <= N.lowDhw) notify("Issiq suv sovib ketdi", "Bufer/GVS: " + state.dhw_temp.toFixed(1) + "В°C", "lowdhw", "рџљї");
+  if (N.freeze !== "" && !state.power && state.ambient_temp <= Number(N.freeze)) notify("Muzlash xavfi!", "Ko'cha " + state.ambient_temp.toFixed(1) + "В°C, nasos o'chiq", "freeze", "рџҐ¶");
   const a = agg();
-  if (N.dailyKwh > 0 && a.d.e >= N.dailyKwh) notify("Kunlik limit oshdi", a.d.e.toFixed(1) + " kWh (limit " + N.dailyKwh + ")", "dlimit", "⚡");
-  if (N.monthlyKwh > 0 && a.m.e >= N.monthlyKwh) notify("Oylik limit oshdi", a.m.e.toFixed(1) + " kWh (limit " + N.monthlyKwh + ")", "mlimit", "⚡");
+  if (N.dailyKwh > 0 && a.d.e >= N.dailyKwh) notify("Kunlik limit oshdi", a.d.e.toFixed(1) + " kWh (limit " + N.dailyKwh + ")", "dlimit", "вљЎ");
+  if (N.monthlyKwh > 0 && a.m.e >= N.monthlyKwh) notify("Oylik limit oshdi", a.m.e.toFixed(1) + " kWh (limit " + N.monthlyKwh + ")", "mlimit", "вљЎ");
 }
 
 async function pollTuyaDevice() {
@@ -544,7 +544,7 @@ async function pollTuyaDevice() {
       parseStatus(res.result);
       failCount = 0; lastOkTs = now;
       $("connDot").className = "w-2 h-2 rounded-full bg-emerald-400 pulse-dot";
-      if (wasOffline) { wasOffline = false; if (cfg.notif.offline) notify("Aloqa tiklandi", d.name + " yana onlayn", "online", "✅"); }
+      if (wasOffline) { wasOffline = false; if (cfg.notif.offline) notify("Aloqa tiklandi", d.name + " yana onlayn", "online", "вњ…"); }
     } else {
       throw new Error((res && res.msg) || "Javob xato");
     }
@@ -552,7 +552,7 @@ async function pollTuyaDevice() {
     failCount++; state.err = failCount >= 3 ? "Aloqa yo'q" : state.err;
     $("connDot").className = "w-2 h-2 rounded-full bg-amber-400 pulse-dot";
     $("iConn").innerText = e.message;
-    if (failCount >= 3 && !wasOffline) { wasOffline = true; if (cfg.notif.offline) notify("Aloqa uzildi", d.name + ": " + e.message, "offline", "📡"); }
+    if (failCount >= 3 && !wasOffline) { wasOffline = true; if (cfg.notif.offline) notify("Aloqa uzildi", d.name + ": " + e.message, "offline", "рџ“Ў"); }
   }
 
   // Energiya hisobi
@@ -607,11 +607,11 @@ function renderUI() {
   const d = curDev();
   $("setupBanner").classList.toggle("hidden", !!(d && cfg.account.clientId));
   $("devBar").classList.toggle("hidden", cfg.devices.length === 0);
-  $("devName").innerText = d ? d.name : "—";
+  $("devName").innerText = d ? d.name : "вЂ”";
   $("devSelect").innerHTML = cfg.devices.map((x, i) => `<option value="${i}" ${i === cfg.active ? "selected" : ""}>${esc(x.name)}</option>`).join("");
 
   const pBtn = $("pwrBtn");
-  pBtn.innerText = state.power ? "ON • ISHLAMOQDA" : "OFF • O'CHIQ";
+  pBtn.innerText = state.power ? "ON вЂў ISHLAMOQDA" : "OFF вЂў O'CHIQ";
   pBtn.className = state.power
     ? "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30"
     : "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-rose-600 text-white shadow-lg";
@@ -632,7 +632,7 @@ function renderUI() {
   const on = "mango-grad text-slate-950 shadow", off = "text-slate-400";
   $("btnRad").className = "px-3 py-1.5 rounded-lg text-xs font-bold " + (sysMode === "radiator" ? on : off);
   $("btnFan").className = "px-3 py-1.5 rounded-lg text-xs font-bold " + (sysMode === "fancoil" ? on : off);
-  $("sysModeDesc").innerText = sysMode === "radiator" ? "Radiator rejimi (Maqsad: " + cfg.limits.radTarget + "°C)" : "Fankoil rejimi (Maqsad: " + cfg.limits.fanTarget + "°C)";
+  $("sysModeDesc").innerText = sysMode === "radiator" ? "Radiator rejimi (Maqsad: " + cfg.limits.radTarget + "В°C)" : "Fankoil rejimi (Maqsad: " + cfg.limits.fanTarget + "В°C)";
 
   document.querySelectorAll("#modeBtns button").forEach(b => b.className = "py-2.5 rounded-xl text-xs font-bold border " + (b.dataset.m === state.mode ? "mango-grad text-slate-950 border-transparent" : "border-slate-800"));
   document.querySelectorAll("#presetBtns button").forEach(b => b.className = "py-2 rounded-xl text-xs font-bold border " + (b.dataset.p === state.preset ? "mango-grad text-slate-950 border-transparent" : "border-slate-800"));
@@ -641,12 +641,12 @@ function renderUI() {
   });
 
   // Qurilma ma'lumotlari
-  $("iName").innerText = d ? d.name : "—";
-  $("iId").innerText = d ? d.id : "—";
-  $("iSrv").innerText = activeEndpoint ? activeEndpoint.replace("https://openapi.", "").replace(".com", "").toUpperCase() : "—";
+  $("iName").innerText = d ? d.name : "вЂ”";
+  $("iId").innerText = d ? d.id : "вЂ”";
+  $("iSrv").innerText = activeEndpoint ? activeEndpoint.replace("https://openapi.", "").replace(".com", "").toUpperCase() : "вЂ”";
   if (failCount === 0 && lastOkTs) $("iConn").innerText = "Onlayn";
-  $("iDelta").innerText = state.power ? (state.outlet_temp - state.inlet_temp).toFixed(1) + " °C" : "—";
-  $("iUp").innerText = statsDB.cur ? Math.round((Date.now() - statsDB.cur.start) / 60000) + " daq" : "—";
+  $("iDelta").innerText = state.power ? (state.outlet_temp - state.inlet_temp).toFixed(1) + " В°C" : "вЂ”";
+  $("iUp").innerText = statsDB.cur ? Math.round((Date.now() - statsDB.cur.start) / 60000) + " daq" : "вЂ”";
   const keys = Object.keys(rawDps);
   $("rawBox").innerHTML = keys.length ? keys.map(k => `<div class="flex justify-between gap-2"><span class="text-orange-300">${esc(k)}</span><span class="truncate">${esc(JSON.stringify(rawDps[k]))}</span></div>`).join("") : "Ma'lumot kelmagan";
 
@@ -669,7 +669,7 @@ function renderUI() {
 }
 
 // ====================== SOZLAMALAR OYNASI ======================
-const TABS = [["account", "👤 Akkaunt"], ["devices", "📟 Qurilmalar"], ["system", "🌡️ Tizim"], ["tariff", "💰 Tarif"], ["notif", "🔔 Xabarlar"], ["adv", "🔧 Qo'shimcha"], ["data", "💾 Ma'lumot"]];
+const TABS = [["account", "рџ‘¤ Akkaunt"], ["devices", "рџ“џ Qurilmalar"], ["system", "рџЊЎпёЏ Tizim"], ["tariff", "рџ’° Tarif"], ["notif", "рџ”” Xabarlar"], ["adv", "рџ”§ Qo'shimcha"], ["data", "рџ’ѕ Ma'lumot"]];
 const SCHEMA = {
   account: [
     { k: "account.clientId", l: "Tuya Client ID (Access ID)", t: "text" },
@@ -677,11 +677,11 @@ const SCHEMA = {
     { k: "account.region", l: "Server mintaqasi (Data Center)", t: "select", o: [["auto", "Avtomatik topish"], ["https://openapi.tuyaeu.com", "Yevropa (EU)"], ["https://openapi.tuyacn.com", "Xitoy (CN)"], ["https://openapi.tuyaus.com", "AQSh (US)"], ["https://openapi.tuyain.com", "Hindiston (IN)"]] }
   ],
   system: [
-    { k: "limits.radTarget", l: "Radiator: standart harorat (°C)", t: "number" },
-    { k: "limits.fanTarget", l: "Fankoil: standart harorat (°C)", t: "number" },
-    { k: "limits.min", l: "Minimal harorat (°C)", t: "number" },
-    { k: "limits.max", l: "Maksimal harorat (°C)", t: "number" },
-    { k: "limits.step", l: "+/- tugma qadami (°C)", t: "number", step: "0.5" },
+    { k: "limits.radTarget", l: "Radiator: standart harorat (В°C)", t: "number" },
+    { k: "limits.fanTarget", l: "Fankoil: standart harorat (В°C)", t: "number" },
+    { k: "limits.min", l: "Minimal harorat (В°C)", t: "number" },
+    { k: "limits.max", l: "Maksimal harorat (В°C)", t: "number" },
+    { k: "limits.step", l: "+/- tugma qadami (В°C)", t: "number", step: "0.5" },
     { k: "poll", l: "Ma'lumot yangilash (soniya, min 2)", t: "number" }
   ],
   tariff: [
@@ -698,9 +698,9 @@ const SCHEMA = {
     { k: "notif.power", l: "Nasos yoqilsa / o'chsa", t: "check" },
     { k: "notif.session", l: "Seans tugaganda hisobot", t: "check" },
     { k: "notif.vibrate", l: "Tebranish", t: "check" },
-    { k: "notif.highOut", l: "Padacha harorati shundan oshsa (°C, 0 = o'chiq)", t: "number" },
-    { k: "notif.lowDhw", l: "Issiq suv shundan pasaysa (°C, 0 = o'chiq)", t: "number" },
-    { k: "notif.freeze", l: "Nasos o'chiq va ko'cha shundan sovuq (°C)", t: "number" },
+    { k: "notif.highOut", l: "Padacha harorati shundan oshsa (В°C, 0 = o'chiq)", t: "number" },
+    { k: "notif.lowDhw", l: "Issiq suv shundan pasaysa (В°C, 0 = o'chiq)", t: "number" },
+    { k: "notif.freeze", l: "Nasos o'chiq va ko'cha shundan sovuq (В°C)", t: "number" },
     { k: "notif.dailyKwh", l: "Kunlik kWh limit (0 = o'chiq)", t: "number" },
     { k: "notif.monthlyKwh", l: "Oylik kWh limit (0 = o'chiq)", t: "number" },
     { k: "notif.cooldown", l: "Bir xil xabar oralig'i (daqiqa)", t: "number" },
@@ -712,7 +712,7 @@ const SCHEMA = {
     { k: "dp.switch", l: "Yoqish/o'chirish DP kodi", t: "text" },
     { k: "dp.temp_set", l: "Maqsadli harorat DP kodi", t: "text" },
     { k: "dp.mode", l: "Rejim DP kodi", t: "text" },
-    { k: "dp.scale", l: "Harorat masshtabi", t: "select", o: [["auto", "Avto"], ["1", "x1 (25 = 25°C)"], ["10", "x10 (250 = 25.0°C)"]] },
+    { k: "dp.scale", l: "Harorat masshtabi", t: "select", o: [["auto", "Avto"], ["1", "x1 (25 = 25В°C)"], ["10", "x10 (250 = 25.0В°C)"]] },
     { k: "dp.m_heating", l: "Rejim qiymati: Isitish", t: "text" },
     { k: "dp.m_cooling", l: "Rejim qiymati: Sovutish", t: "text" },
     { k: "dp.m_dhw", l: "Rejim qiymati: Issiq suv", t: "text" },
@@ -720,8 +720,8 @@ const SCHEMA = {
   ]
 };
 const HINTS = {
-  account: "Tuya IoT Platform (iot.tuya.com) → Cloud → Project → Overview dan Access ID va Access Secret ni oling. Qurilmangiz ulangan Smart Life ilovasi shu loyihaga bog'langan bo'lishi kerak.",
-  adv: "Bu yerni faqat qurilmangiz DP kodlari boshqacha bo'lsa o'zgartiring. Asosiy ekrandagi «Barcha DP» tugmasi qurilma yuborayotgan kodlarni ko'rsatadi."
+  account: "Tuya IoT Platform (iot.tuya.com) в†’ Cloud в†’ Project в†’ Overview dan Access ID va Access Secret ni oling. Qurilmangiz ulangan Smart Life ilovasi shu loyihaga bog'langan bo'lishi kerak.",
+  adv: "Bu yerni faqat qurilmangiz DP kodlari boshqacha bo'lsa o'zgartiring. Asosiy ekrandagi В«Barcha DPВ» tugmasi qurilma yuborayotgan kodlarni ko'rsatadi."
 };
 let curTab = "account";
 function getPath(o, p) { return p.split(".").reduce((a, k) => a && a[k], o); }
@@ -748,8 +748,8 @@ function renderTabs() {
   if (curTab === "devices") h += devicesHTML();
   else if (curTab === "data") h += dataHTML();
   else h += (SCHEMA[curTab] || []).map(fieldHTML).join("");
-  if (curTab === "account") h += `<button onclick="testConn()" class="w-full py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs">🔌 Ulanishni tekshirish</button><div id="testRes" class="text-[11px] text-center text-slate-300"></div>`;
-  if (curTab === "notif") h += `<div class="grid grid-cols-2 gap-2"><button onclick="askNotifPermission()" class="py-2.5 rounded-xl bg-slate-800 border border-slate-700 font-bold text-xs">🔐 Ruxsat so'rash</button><button onclick="testNotify()" class="py-2.5 rounded-xl bg-slate-800 border border-slate-700 font-bold text-xs">🧪 Test xabar</button></div>`;
+  if (curTab === "account") h += `<button onclick="testConn()" class="w-full py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs">рџ”Њ Ulanishni tekshirish</button><div id="testRes" class="text-[11px] text-center text-slate-300"></div>`;
+  if (curTab === "notif") h += `<div class="grid grid-cols-2 gap-2"><button onclick="askNotifPermission()" class="py-2.5 rounded-xl bg-slate-800 border border-slate-700 font-bold text-xs">рџ”ђ Ruxsat so'rash</button><button onclick="testNotify()" class="py-2.5 rounded-xl bg-slate-800 border border-slate-700 font-bold text-xs">рџ§Є Test xabar</button></div>`;
   $("tabBody").innerHTML = h;
 }
 function gotoTab(t) { collectTab(); curTab = t; renderTabs(); }
@@ -761,7 +761,7 @@ function saveSettings() {
   if (cfg.limits.min >= cfg.limits.max) { cfg.limits.min = 15; cfg.limits.max = 65; toast("Min/Max noto'g'ri, tiklandi"); }
   saveCfg();
   accessToken = ""; tokenExpireTime = 0; activeEndpoint = "";
-  closeSettings(); toast("✅ Sozlamalar saqlandi");
+  closeSettings(); toast("вњ… Sozlamalar saqlandi");
   renderUI(); pollTuyaDevice();
 }
 async function testConn() {
@@ -770,14 +770,14 @@ async function testConn() {
   accessToken = ""; tokenExpireTime = 0; activeEndpoint = "";
   if (!cfg.account.clientId || !cfg.account.secret) { r.innerHTML = "<span class='text-rose-400'>Client ID va Secret kiriting</span>"; return; }
   const ok = await ensureToken();
-  r.innerHTML = ok ? `<span class="text-emerald-400 font-bold">✅ Muvaffaqiyatli! Server: ${esc(activeEndpoint)}</span>` : `<span class="text-rose-400 font-bold">❌ ${esc(ensureToken.lastMsg || "Xato")}</span>`;
+  r.innerHTML = ok ? `<span class="text-emerald-400 font-bold">вњ… Muvaffaqiyatli! Server: ${esc(activeEndpoint)}</span>` : `<span class="text-rose-400 font-bold">вќЊ ${esc(ensureToken.lastMsg || "Xato")}</span>`;
 }
 
 // --- Qurilmalar ---
 function devicesHTML() {
-  let h = cfg.devices.map((d, i) => `<div class="fld flex items-center justify-between gap-2 ${i === cfg.active ? "border-orange-500/60" : ""}"><div class="min-w-0"><div class="font-extrabold text-[12px] truncate">${esc(d.name)} ${i === cfg.active ? "<span class='text-orange-400'>• faol</span>" : ""}</div><div class="text-[10px] text-slate-400 truncate">${esc(d.id)}</div></div><div class="flex gap-1.5 flex-none"><button onclick="devUse(${i})" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-[11px] font-bold">Tanlash</button><button onclick="devEdit(${i})" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-[11px] font-bold">✏️</button><button onclick="devDel(${i})" class="px-2.5 py-1.5 rounded-lg bg-rose-700/70 text-[11px] font-bold">🗑</button></div></div>`).join("");
+  let h = cfg.devices.map((d, i) => `<div class="fld flex items-center justify-between gap-2 ${i === cfg.active ? "border-orange-500/60" : ""}"><div class="min-w-0"><div class="font-extrabold text-[12px] truncate">${esc(d.name)} ${i === cfg.active ? "<span class='text-orange-400'>вЂў faol</span>" : ""}</div><div class="text-[10px] text-slate-400 truncate">${esc(d.id)}</div></div><div class="flex gap-1.5 flex-none"><button onclick="devUse(${i})" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-[11px] font-bold">Tanlash</button><button onclick="devEdit(${i})" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-[11px] font-bold">вњЏпёЏ</button><button onclick="devDel(${i})" class="px-2.5 py-1.5 rounded-lg bg-rose-700/70 text-[11px] font-bold">рџ—‘</button></div></div>`).join("");
   if (!cfg.devices.length) h += `<div class="text-center text-slate-500 py-2">Hali qurilma qo'shilmagan.</div>`;
-  h += `<div class="fld space-y-2"><div class="font-extrabold text-[12px]">➕ Yangi teplovoy nasos qo'shish</div><div><div class="lbl">Nomi (masalan: Uy, Dacha)</div><input class="inp" id="nd_name" type="text"></div><div><div class="lbl">Device ID (Tuya)</div><input class="inp" id="nd_id" type="text"></div><button onclick="devAdd()" class="w-full py-2.5 rounded-xl mango-grad text-slate-950 font-extrabold text-xs">Qo'shish</button></div>`;
+  h += `<div class="fld space-y-2"><div class="font-extrabold text-[12px]">вћ• Yangi teplovoy nasos qo'shish</div><div><div class="lbl">Nomi (masalan: Uy, Dacha)</div><input class="inp" id="nd_name" type="text"></div><div><div class="lbl">Device ID (Tuya)</div><input class="inp" id="nd_id" type="text"></div><button onclick="devAdd()" class="w-full py-2.5 rounded-xl mango-grad text-slate-950 font-extrabold text-xs">Qo'shish</button></div>`;
   return h;
 }
 function devAdd() {
@@ -786,7 +786,7 @@ function devAdd() {
   if (cfg.devices.some(d => d.id === id)) { toast("Bu qurilma allaqachon bor"); return; }
   saveDeviceData();
   cfg.devices.push({ id, name: n }); cfg.active = cfg.devices.length - 1; saveCfg();
-  loadDeviceData(); lastTick = 0; renderTabs(); renderUI(); toast("✅ Qurilma qo'shildi");
+  loadDeviceData(); lastTick = 0; renderTabs(); renderUI(); toast("вњ… Qurilma qo'shildi");
 }
 function devUse(i) { switchDevice(i); renderTabs(); }
 function devEdit(i) {
@@ -796,7 +796,7 @@ function devEdit(i) {
   saveCfg(); renderTabs(); renderUI();
 }
 function devDel(i) {
-  if (!confirm("«" + cfg.devices[i].name + "» o'chirilsinmi? Uning statistikasi ham o'chadi.")) return;
+  if (!confirm("В«" + cfg.devices[i].name + "В» o'chirilsinmi? Uning statistikasi ham o'chadi.")) return;
   const id = cfg.devices[i].id;
   localStorage.removeItem("mango_state_" + id); localStorage.removeItem("mango_stats_" + id);
   cfg.devices.splice(i, 1);
@@ -807,17 +807,17 @@ function devDel(i) {
 // --- Ma'lumot / zaxira ---
 function dataHTML() {
   return `
-  <div class="fld space-y-2"><div class="font-extrabold text-[12px]">📤 Zaxira nusxa (sozlamalar, qurilmalar)</div><div class="text-[11px] text-slate-400">Akkaunt kalitlari ham kiradi — begonaga bermang.</div>
+  <div class="fld space-y-2"><div class="font-extrabold text-[12px]">рџ“¤ Zaxira nusxa (sozlamalar, qurilmalar)</div><div class="text-[11px] text-slate-400">Akkaunt kalitlari ham kiradi вЂ” begonaga bermang.</div>
   <button onclick="exportCfg()" class="w-full py-2.5 rounded-xl bg-slate-800 border border-slate-700 font-bold text-xs">Matn sifatida ko'rsatish</button>
   <textarea id="bk" rows="5" class="inp font-mono" placeholder="Zaxira JSON shu yerda; tiklash uchun bu yerga joylang"></textarea>
-  <button onclick="importCfg()" class="w-full py-2.5 rounded-xl bg-slate-800 border border-slate-700 font-bold text-xs">📥 Tiklash</button></div>
-  <button onclick="resetStats()" class="w-full py-2.5 rounded-xl bg-amber-600/80 text-white font-bold text-xs">🧹 Faol qurilma statistikasini 0 qilish</button>
-  <button onclick="resetAll()" class="w-full py-2.5 rounded-xl bg-rose-700 text-white font-bold text-xs">⚠️ Hamma narsani tozalash (zavod holati)</button>
+  <button onclick="importCfg()" class="w-full py-2.5 rounded-xl bg-slate-800 border border-slate-700 font-bold text-xs">рџ“Ґ Tiklash</button></div>
+  <button onclick="resetStats()" class="w-full py-2.5 rounded-xl bg-amber-600/80 text-white font-bold text-xs">рџ§№ Faol qurilma statistikasini 0 qilish</button>
+  <button onclick="resetAll()" class="w-full py-2.5 rounded-xl bg-rose-700 text-white font-bold text-xs">вљ пёЏ Hamma narsani tozalash (zavod holati)</button>
   <div class="text-center text-[10px] text-slate-500 pt-2">Mango Energy Pro v3.0</div>`;
 }
 function exportCfg() { $("bk").value = JSON.stringify(cfg); $("bk").select(); try { document.execCommand("copy"); toast("Nusxalandi"); } catch (e) {} }
 function importCfg() {
-  try { const o = JSON.parse($("bk").value); cfg = deepMerge(DEFAULT_CFG, o); saveCfg(); loadDeviceData(); renderTabs(); renderUI(); toast("✅ Tiklandi"); }
+  try { const o = JSON.parse($("bk").value); cfg = deepMerge(DEFAULT_CFG, o); saveCfg(); loadDeviceData(); renderTabs(); renderUI(); toast("вњ… Tiklandi"); }
   catch (e) { toast("JSON noto'g'ri"); }
 }
 function resetStats() { if (!confirm("Statistika 0 qilinsinmi?")) return; statsDB = freshStats(); saveDeviceData(); renderUI(); toast("Statistika tozalandi"); }
