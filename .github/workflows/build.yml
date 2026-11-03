@@ -21,7 +21,7 @@ jobs:
           cp node_modules/spark-md5/spark-md5.min.js www/
       - name: Add Android platform
         run: |
-          rm -rf android
+          rm -rf android ios capacitor.config.ts capacitor.config.js
           npx cap add android
           if [ -f assets/icon-only.png ]; then npx capacitor-assets generate --android || true; fi
           sed -i 's#<application#<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <application#' android/app/src/main/AndroidManifest.xml
