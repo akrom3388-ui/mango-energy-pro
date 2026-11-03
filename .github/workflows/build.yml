@@ -1,4 +1,4 @@
-﻿name: Build Mango Pro v4 Standalone APK
+﻿name: Build Pure Native Kotlin APK (No WebView!)
 
 on:
   push:
@@ -6,59 +6,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-apk:
+  build-native-apk:
     runs-on: ubuntu-latest
 
     steps:
       - name: 1. Checkout code
         uses: actions/checkout@v4
 
-      - name: 2. Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: 3. Setup Java 21
+      - name: 2. Setup Java JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
-      - name: 4. Force Clean Standalone Capacitor Config (No Web URL!)
-        run: |
-          cat << 'EOF' > capacitor.config.json
-          {
-            "appId": "uz.akrom.mangopro.v4",
-            "appName": "Mango Energy Pro",
-            "webDir": "www",
-            "bundledWebRuntime": false,
-            "plugins": {
-              "CapacitorHttp": { "enabled": true },
-              "LocalNotifications": { "smallIcon": "ic_launcher", "iconColor": "#FF7B00" }
-            }
-          }
-          EOF
+      - name: 3. Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
 
-      - name: 5. Install Capacitor & Build Android Platform
-        run: |
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/local-notifications@6 @capacitor/assets --save
-          npx cap add android
-          npx capacitor-assets generate --android || true
-          npx cap copy android
-          npx cap sync android
+      - name: 4. Build Native Android APK
+        run: gradle assembleDebug
 
-      - name: 6. Add Android Permissions
-        run: |
-          sed -i 's/<application/<uses-permission android:name="android.permission.POST_NOTIFICATIONS" \/>\n    <uses-permission android:name="android.permission.WAKE_LOCK" \/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" \/>\n    <application android:usesCleartextTraffic="true"/g' android/app/src/main/AndroidManifest.xml
-
-      - name: 7. Compile APK
-        working-directory: ./android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: 8. Upload MangoPro-v4-Standalone-APK
+      - name: 5. Upload MangoPro-v5-PURE-NATIVE-APK
         uses: actions/upload-artifact@v4
         with:
-          name: MangoPro-v4-Standalone-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: MangoPro-v5-PURE-NATIVE-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
