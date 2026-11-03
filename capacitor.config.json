@@ -1,7 +1,8 @@
 ﻿{
-  "appId": "uz.akrom.mangopro",
+  "appId": "uz.akrom.mangopro.v4",
   "appName": "Mango Energy Pro",
   "webDir": "www",
+  "bundledWebRuntime": false,
   "plugins": {
     "CapacitorHttp": {
       "enabled": true
